@@ -1,0 +1,56 @@
+version: '2.4'
+
+volumes:
+  db-persist:
+  cache-persist:
+
+services:
+  baaz:
+    build:
+      context: .
+      dockerfile: vendor/benzine/benzine-docker/Dockerfile
+    image: matthewbaggett/baaz
+    ports:
+      - 127.0.0.20:80:80
+    volumes:
+      - ./:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      mariadb:
+        condition: service_healthy
+    environment:
+      REDIS_HOST: tcp://redis:6379
+
+  redis:
+    image: redis:5
+    ports:
+      - 127.0.0.20:6379:6379
+    command: redis-server --appendonly yes
+    volumes:
+      - cache-persist:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  mariadb:
+    image: mariadb:10
+    restart: always
+    volumes:
+      - db-persist:/var/lib/mysql
+    ports:
+      - 127.0.0.20:3306:3306
+    environment:
+      - MYSQL_DATABASE=rolodex
+      - MYSQL_USER=rolodex
+      - MYSQL_PASSWORD=VTL7pRnvpfZKH2zQ
+      - MYSQL_ROOT_PASSWORD=tFDuKn4B47DrKJm5
+    healthcheck:
+      test: ["CMD", "mysqladmin", "-urolodex", "-pVTL7pRnvpfZKH2zQ", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

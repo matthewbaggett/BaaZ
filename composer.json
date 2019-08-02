@@ -1,0 +1,50 @@
+{
+    "name": "matthewbaggett/baaz",
+    "description": "Bazaar As A Zervice",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Matthew Baggett",
+            "email": "matthew@baggett.me"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "benzine/benzine": "dev-master",
+        "benzine/benzine-cache": "dev-master",
+        "benzine/benzine-configuration": "dev-master",
+        "benzine/benzine-container": "dev-master",
+        "benzine/benzine-controllers": "dev-master",
+        "benzine/benzine-database": "dev-master",
+        "benzine/benzine-docker": "dev-master",
+        "benzine/benzine-html": "dev-master",
+        "benzine/benzine-http-assets": "dev-master",
+        "benzine/benzine-log": "dev-master",
+        "benzine/benzine-middleware": "dev-master",
+        "benzine/benzine-migrator": "dev-master",
+        "benzine/benzine-redis": "dev-master",
+        "benzine/benzine-router": "dev-master",
+        "benzine/benzine-session": "dev-master",
+        "benzine/benzine-services": "dev-master",
+        "benzine/benzine-style": "dev-master",
+        "benzine/benzine-test": "dev-master",
+        "benzine/benzine-test-fake-data": "dev-master",
+        "benzine/benzine-traits": "dev-master",
+        "benzine/benzine-uuid": "dev-master",
+        "guzzlehttp/guzzle": "^6.3",
+        "kevinrob/guzzle-cache-middleware": "^3.2",
+        "doctrine/common": "^2.10",
+        "react/react": "^1.0",
+        "qxsch/worker-pool": "^1.5",
+        "wyrihaximus/cpu-core-detector": "^1.0",
+
+        "psr/cache": "^1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Baaz\\": "src",
+            "Baaz\\Tests\\": "tests/"
+        }
+    }
+}

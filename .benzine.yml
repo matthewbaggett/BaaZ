@@ -1,0 +1,16 @@
+benzine:
+  application:
+    name: Bazaar
+    class: \Baaz\Baaz
+    default_access: public
+    debug: true
+  databases:
+    default:
+      type: mysql
+      connection: $MYSQL_HOST
+      username: $MYSQL_USERNAME
+      password: $MYSQL_PASSWORD
+      migrations: migrations/MySQL
+    cache:
+      type: redis
+      connection: $REDIS_HOST
