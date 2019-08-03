@@ -5,6 +5,9 @@ php:
 
 env:
   - DOCKER_COMPOSE_VERSION=1.21.0
+  - CONTAINER=frontend
+  - CONTAINER=backend
+  - CONTAINER=worker-feed
 
 cache:
   directories:
@@ -19,11 +22,11 @@ before_install:
 
 script:
   - composer install
-  - docker-compose build
+  - docker-compose build $CONTAINER
 
 before_deploy:
   - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
-  - docker-compose push
+  - docker-compose push $CONTAINER
 
 notifications:
   email:
