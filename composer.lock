@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine.git",
-                "reference": "d81f414d58125c2fcefbd2035313348fcbf2aef5"
+                "reference": "b250a4e3c70b12b1126b93b97895f820afd805ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine/zipball/d81f414d58125c2fcefbd2035313348fcbf2aef5",
-                "reference": "d81f414d58125c2fcefbd2035313348fcbf2aef5",
+                "url": "https://api.github.com/repos/benzine-framework/benzine/zipball/b250a4e3c70b12b1126b93b97895f820afd805ae",
+                "reference": "b250a4e3c70b12b1126b93b97895f820afd805ae",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:42:07+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-cache",
@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-cache.git",
-                "reference": "f53610ad182575848d058b94ba9098b4d1c81f0c"
+                "reference": "25e872f4af8cebe277e84034301ca266c06e2933"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-cache/zipball/f53610ad182575848d058b94ba9098b4d1c81f0c",
-                "reference": "f53610ad182575848d058b94ba9098b4d1c81f0c",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-cache/zipball/25e872f4af8cebe277e84034301ca266c06e2933",
+                "reference": "25e872f4af8cebe277e84034301ca266c06e2933",
                 "shasum": ""
             },
             "require": {
@@ -112,7 +112,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-02T19:36:23+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-configuration",
@@ -196,12 +196,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-controllers.git",
-                "reference": "c12ed086ec012c0d6b4333db312e1ee3755190e2"
+                "reference": "c3fb7368e8c9d4cacd2c0d5d9bfe4ef2b0c98566"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-controllers/zipball/c12ed086ec012c0d6b4333db312e1ee3755190e2",
-                "reference": "c12ed086ec012c0d6b4333db312e1ee3755190e2",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-controllers/zipball/c3fb7368e8c9d4cacd2c0d5d9bfe4ef2b0c98566",
+                "reference": "c3fb7368e8c9d4cacd2c0d5d9bfe4ef2b0c98566",
                 "shasum": ""
             },
             "require": {
@@ -227,7 +227,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:42:06+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-database",
@@ -235,12 +235,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-database.git",
-                "reference": "6940f541e3a0537c230dce2a40fb11b5ebfebaa9"
+                "reference": "7fc42d75d263a9828cb20e3d356830e1cecd6691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-database/zipball/6940f541e3a0537c230dce2a40fb11b5ebfebaa9",
-                "reference": "6940f541e3a0537c230dce2a40fb11b5ebfebaa9",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-database/zipball/7fc42d75d263a9828cb20e3d356830e1cecd6691",
+                "reference": "7fc42d75d263a9828cb20e3d356830e1cecd6691",
                 "shasum": ""
             },
             "require": {
@@ -265,7 +265,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-02T12:23:25+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-docker",
@@ -371,12 +371,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-log.git",
-                "reference": "665f78659435ad9f130ab578efddf591400c05b3"
+                "reference": "85312a305af6878dc09a55274994b00eb0eb301b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-log/zipball/665f78659435ad9f130ab578efddf591400c05b3",
-                "reference": "665f78659435ad9f130ab578efddf591400c05b3",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-log/zipball/85312a305af6878dc09a55274994b00eb0eb301b",
+                "reference": "85312a305af6878dc09a55274994b00eb0eb301b",
                 "shasum": ""
             },
             "require": {
@@ -403,7 +403,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:42:07+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-middleware",
@@ -456,12 +456,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-migrator.git",
-                "reference": "ca66b6fe68fff689f507288f89bcd47a39babd63"
+                "reference": "76cb00c3d5bbb9ae66c2407ee97dac48999bac3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-migrator/zipball/ca66b6fe68fff689f507288f89bcd47a39babd63",
-                "reference": "ca66b6fe68fff689f507288f89bcd47a39babd63",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-migrator/zipball/76cb00c3d5bbb9ae66c2407ee97dac48999bac3a",
+                "reference": "76cb00c3d5bbb9ae66c2407ee97dac48999bac3a",
                 "shasum": ""
             },
             "require": {
@@ -493,7 +493,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-02T12:58:51+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-redis",
@@ -501,12 +501,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-redis.git",
-                "reference": "1d1ca16b7f54278a89481df3d6ea8adc8bb03687"
+                "reference": "5e305da8da6fc2541f98589249a67b89d5d3de41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-redis/zipball/1d1ca16b7f54278a89481df3d6ea8adc8bb03687",
-                "reference": "1d1ca16b7f54278a89481df3d6ea8adc8bb03687",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-redis/zipball/5e305da8da6fc2541f98589249a67b89d5d3de41",
+                "reference": "5e305da8da6fc2541f98589249a67b89d5d3de41",
                 "shasum": ""
             },
             "require": {
@@ -530,7 +530,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:42:07+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-router",
@@ -735,12 +735,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-test-fake-data.git",
-                "reference": "9712bd239dd3af740bfa99344cd4915edd88f367"
+                "reference": "d7eabc498db062ca6da1c42c93ee675147b9072c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-test-fake-data/zipball/9712bd239dd3af740bfa99344cd4915edd88f367",
-                "reference": "9712bd239dd3af740bfa99344cd4915edd88f367",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-test-fake-data/zipball/d7eabc498db062ca6da1c42c93ee675147b9072c",
+                "reference": "d7eabc498db062ca6da1c42c93ee675147b9072c",
                 "shasum": ""
             },
             "require": {
@@ -765,7 +765,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-02T13:11:57+00:00"
+            "time": "2019-08-03T00:52:27+00:00"
         },
         {
             "name": "benzine/benzine-traits",
@@ -773,12 +773,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-traits.git",
-                "reference": "cbd79b7ff9e6032b8127eecb6fecacfed8b09bf8"
+                "reference": "9f5b35e95176568b499a561b4c2a9b0df6936047"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-traits/zipball/cbd79b7ff9e6032b8127eecb6fecacfed8b09bf8",
-                "reference": "cbd79b7ff9e6032b8127eecb6fecacfed8b09bf8",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-traits/zipball/9f5b35e95176568b499a561b4c2a9b0df6936047",
+                "reference": "9f5b35e95176568b499a561b4c2a9b0df6936047",
                 "shasum": ""
             },
             "require": {
@@ -803,7 +803,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:42:07+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "benzine/benzine-uuid",
@@ -811,12 +811,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-uuid.git",
-                "reference": "c4fceaae2e4d3389f4931b1b3145ba2423b71412"
+                "reference": "313f41c69dc6d6d104056ee4490083b6ff01e6d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-uuid/zipball/c4fceaae2e4d3389f4931b1b3145ba2423b71412",
-                "reference": "c4fceaae2e4d3389f4931b1b3145ba2423b71412",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-uuid/zipball/313f41c69dc6d6d104056ee4490083b6ff01e6d8",
+                "reference": "313f41c69dc6d6d104056ee4490083b6ff01e6d8",
                 "shasum": ""
             },
             "require": {
@@ -844,7 +844,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-02T19:36:23+00:00"
+            "time": "2019-08-03T00:52:28+00:00"
         },
         {
             "name": "bnf/slim3-psr15",

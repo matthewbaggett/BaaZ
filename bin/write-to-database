@@ -1,0 +1,14 @@
+#!/usr/bin/php
+<?php
+
+require_once(__DIR__ . "/../vendor/autoload.php");
+ini_set('memory_limit', '1024M');
+use Baaz\Workers;
+use ⌬\⌬;
+
+⌬::Instance([
+    'config' => __DIR__ . "/../.benzine.yml",
+])
+    ->getContainer()
+    ->get(Workers\WriteToDatabase::class)
+    ->run();

@@ -18,7 +18,7 @@ use ⌬\Redis\Redis;
 use ⌬\Services\EnvironmentService;
 use ⌬\UUID\UUID;
 
-class FeedIngester
+class FeedIngester extends GenericWorker
 {
     public const CACHE_PATH = __DIR__.'/../../cache/';
     /** @var GuzzleClient */
@@ -26,16 +26,15 @@ class FeedIngester
 
     /** @var Redis */
     protected $redis;
-
-    /** @var WorkerPool */
-    protected $workerPool;
-
+    
     public function __construct(
         Redis $redis,
         EnvironmentService $environmentService
     ) {
+        parent::__construct($environmentService);
+
         $this->redis = $redis;
-        $this->environmentService = $environmentService;
+
         $stack = HandlerStack::create();
 
         $stack->push(
@@ -52,19 +51,6 @@ class FeedIngester
         );
 
         $this->guzzle = new GuzzleClient(['handler' => $stack]);
-    }
-
-    public function getNewWorkerPool(): WorkerPool
-    {
-        $workerPool = new WorkerPool();
-        $cpuCoreCount = Detector::detect();
-        $threadCount = $cpuCoreCount * $this->environmentService->get('THREAD_MULTIPLE', 1.0);
-
-        $threadCount = clamp(1, floor($threadCount), $cpuCoreCount * 2);
-
-        $workerPool->setWorkerPoolSize($threadCount);
-
-        return $workerPool;
     }
 
     public function run(): void
