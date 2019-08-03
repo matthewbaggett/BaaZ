@@ -13,11 +13,12 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - make build
+  - composer install
+  - docker-compose build
 
 before_deploy:
   - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
-  - make push
+  - docker-compose push
 
 notifications:
   email:
