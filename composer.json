@@ -39,7 +39,8 @@
         "qxsch/worker-pool": "^1.5",
         "wyrihaximus/cpu-core-detector": "^1.0",
 
-        "psr/cache": "^1.0.0"
+        "psr/cache": "^1.0.0",
+        "matthewbaggett/clamp": "^1.1"
     },
     "autoload": {
         "psr-4": {

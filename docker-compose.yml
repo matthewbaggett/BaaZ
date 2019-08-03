@@ -5,24 +5,74 @@ volumes:
   cache-persist:
 
 services:
-  baaz:
+  frontend:
     build:
       context: .
-      dockerfile: vendor/benzine/benzine-docker/Dockerfile
-    image: matthewbaggett/baaz
+      target: web
+    image: registry.gone.io/baaz/frontend
     ports:
       - 127.0.0.20:80:80
     volumes:
       - ./:/app
+      - ./src/FrontendControllers:/app/src/Controllers:ro
+    environment:
+      REDIS_HOST: tcp://redis-frontend:6379
+      BAAZ_BACKEND: http://backend/
     depends_on:
-      redis:
+      redis-frontend:
         condition: service_healthy
-      mariadb:
+      backend:
+        condition: service_healthy
+    cpus: 0.50
+    healthcheck:
+      disable: true
+
+  backend:
+    build:
+      context: .
+      target: web
+    image: registry.gone.io/baaz/backend
+    ports:
+      - 127.0.0.20:81:80
+    volumes:
+      - ./:/app
+      - ./src/BackendControllers:/app/src/Controllers:ro
+    environment:
+      REDIS_HOST: tcp://redis-backend:6379
+    depends_on:
+      redis-backend:
+        condition: service_healthy
+    cpus: 0.50
+
+  worker-feed:
+    build:
+      context: .
+      target: worker
+    image: registry.gone.io/baaz/worker
+    volumes:
+      - ./:/app
+    depends_on:
+      redis-backend:
         condition: service_healthy
     environment:
-      REDIS_HOST: tcp://redis:6379
+      REDIS_HOST: tcp://redis-backend:6379
+      THREAD_MULTIPLE: 0.25
+    cpus: 0.50
 
-  redis:
+  redis-frontend:
+    image: redis:5
+    ports:
+      - 127.0.0.20:6378:6379
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    cpus: 0.70
+
+  redis-backend:
     image: redis:5
     ports:
       - 127.0.0.20:6379:6379
@@ -35,22 +85,50 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    cpus: 0.70
 
-  mariadb:
-    image: mariadb:10
+  redis-monitor-frontend:
+    image: redis:5
+    command: redis-cli -h redis-frontend MONITOR
+    depends_on:
+      redis-frontend:
+        condition: service_healthy
+
+  redis-monitor-backend:
+    image: redis:5
+    command: redis-cli -h redis-backend MONITOR
+    depends_on:
+      redis-backend:
+        condition: service_healthy
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
     restart: always
-    volumes:
-      - db-persist:/var/lib/mysql
-    ports:
-      - 127.0.0.20:3306:3306
     environment:
-      - MYSQL_DATABASE=rolodex
-      - MYSQL_USER=rolodex
-      - MYSQL_PASSWORD=VTL7pRnvpfZKH2zQ
-      - MYSQL_ROOT_PASSWORD=tFDuKn4B47DrKJm5
-    healthcheck:
-      test: ["CMD", "mysqladmin", "-urolodex", "-pVTL7pRnvpfZKH2zQ", "ping"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      - REDIS_HOSTS=frontend:redis-frontend:6379:0,backend:redis-backend:6379:0
+    ports:
+      - 127.0.0.20:8081:8081
+    depends_on:
+      redis-frontend:
+        condition: service_healthy
+      redis-backend:
+        condition: service_healthy
+
+  #mariadb:
+  #  image: mariadb:10
+  #  restart: always
+  #  volumes:
+  #    - db-persist:/var/lib/mysql
+  #  ports:
+  #    - 127.0.0.20:3306:3306
+  #  environment:
+  #    - MYSQL_DATABASE=rolodex
+  #    - MYSQL_USER=rolodex
+  #    - MYSQL_PASSWORD=VTL7pRnvpfZKH2zQ
+  #    - MYSQL_ROOT_PASSWORD=tFDuKn4B47DrKJm5
+  #  healthcheck:
+  #    test: ["CMD", "mysqladmin", "-urolodex", "-pVTL7pRnvpfZKH2zQ", "ping"]
+  #    interval: 5s
+  #    timeout: 10s
+  #    retries: 3
+  #    start_period: 10s

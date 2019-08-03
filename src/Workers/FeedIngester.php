@@ -13,26 +13,30 @@ use QXS\WorkerPool\ClosureWorker;
 use QXS\WorkerPool\Semaphore;
 use QXS\WorkerPool\WorkerPool;
 use WyriHaximus\CpuCoreDetector\Detector;
-use ⌬\⌬;
+use ⌬\Redis\Redis;
+use ⌬\Services\EnvironmentService;
+use ⌬\UUID\UUID;
 
 class FeedIngester
 {
     /** @var GuzzleClient */
     protected $guzzle;
 
+    /** @var Redis */
+    protected $redis;
+
     /** @var WorkerPool */
     protected $workerPool;
-
-    /** @var ⌬ */
-    protected $⌬;
 
     const CACHE_PATH = __DIR__ . "/../../cache/";
 
     public function __construct(
-        ⌬ $⌬
+        Redis $redis,
+        EnvironmentService $environmentService
     )
     {
-        $this->⌬ = $⌬;
+        $this->redis = $redis;
+        $this->environmentService = $environmentService;
         $stack = HandlerStack::create();
 
         $stack->push(
@@ -55,10 +59,11 @@ class FeedIngester
     {
         $workerPool = new WorkerPool();
         $cpuCoreCount = Detector::detect();
-        $threadCount = ($cpuCoreCount + 1);
-        $threadCount = 1;
+        $threadCount = $cpuCoreCount *$this->environmentService->get("THREAD_MULTIPLE", 1.0);
+
+        $threadCount = clamp(1, floor($threadCount), $cpuCoreCount * 2);
+
         $workerPool->setWorkerPoolSize($threadCount);
-        printf("Starting with {$threadCount} threads.");
         return $workerPool;
     }
 
@@ -68,69 +73,61 @@ class FeedIngester
 
         $feeds = \GuzzleHttp\json_decode($feeds->getBody()->getContents(), true);
 
-        ($feedWorkerPool = $this->getNewWorkerPool())
-            ->create(new ClosureWorker(
-                function($feed, Semaphore $semaphore, \ArrayObject $storage){
-                    /**
-                     * @var $start_date
-                     * @var $end_date
-                     * @var $publisher_id
-                     * @var $shop_id
-                     * @var $feeds
-                     * @var $active
-                     * @var $export
-                     * @var $shop
-                     * @var $meta
-                     */
-                    extract($feed);
-                    if(strtotime($start_date) < time() && strtotime($end_date) > time() && $active){
-                        ($channelFeedJsonLinesRequest = $this->guzzle->get($feeds['json.gz']))
-                            ->getBody()->rewind();
+        echo "Main feed downloaded\n";
+
+        $feedWorkerPool = $this->getNewWorkerPool();
+
+        $feedWorkerPool->create(new ClosureWorker(
+            function($feed, Semaphore $semaphore, \ArrayObject $storage){
+                extract($feed);
+                /**
+                 * @var $start_date
+                 * @var $end_date
+                 * @var $publisher_id
+                 * @var $shop_id
+                 * @var $feeds
+                 * @var $active
+                 * @var $export
+                 * @var $shop
+                 * @var $meta
+                 */
+
+                \Kint::dump($feeds);
+
+                if(strtotime($start_date) < time() && strtotime($end_date) > time() && $active){
+                    $ljsonGzPath = self::CACHE_PATH . "{$publisher_id}_{$shop_id}.ljson.gz";
+                    if(!file_exists($ljsonGzPath) || filemtime($ljsonGzPath) < time() - 86400) {
+                        $channelFeedJsonLinesRequest = $this->guzzle->get($feeds['json.gz']);
+                        $channelFeedJsonLinesRequest->getBody()->rewind();
 
                         $channelFeedJsonLinesCompressed = $channelFeedJsonLinesRequest->getBody()->getContents();
-                        \Kint::dump(
-                            $channelFeedJsonLinesRequest,
-                            $channelFeedJsonLinesRequest->getStatusCode(),
-                            $channelFeedJsonLinesRequest->getBody()->getSize(),
-                        );
-                        $ljsonGzPath = self::CACHE_PATH . "{$publisher_id}_{$shop_id}.ljson.gz";
                         file_put_contents($ljsonGzPath, $channelFeedJsonLinesCompressed);
+                    }
 
-                        // Now create another worker to handle each line.
-                        ($productWorker = $this->getNewWorkerPool())
-                            ->create(new ClosureWorker(
-                                function($jsonLine, Semaphore $semaphore, \ArrayObject $storage){
-                                    $productJson = \GuzzleHttp\json_decode($jsonLine, true);
-                                    \Kint::dump($productJson);
-                                    $product = (new Product())
-                                        ->ingest($productJson)
-                                        ->save();
-                                    \Kint::dump($product);
-                                    exit;
-                                }
-                            ));
+                    foreach(gzfile($ljsonGzPath) as $jsonLine){
+                        try {
+                            $product = new Product($this->redis);
+                            $json = \GuzzleHttp\json_decode($jsonLine, true);
+                            $product->ingest($json);
+                            $product->save();
 
-                        foreach(gzfile($ljsonGzPath) as $jsonLine){
-                            #$productWorker->run($jsonLine);
-                            $productJson = \GuzzleHttp\json_decode($jsonLine, true);
-                            \Kint::dump($productJson);
-                            /** @var Product $product */
-                            $product = ($this->⌬->getContainer()->get(Product::class))
-                                ->ingest($productJson)
-                                ->save();
-                            \Kint::dump($product);
-                            exit;
+                            foreach($product->getCacheableImageUrls() as $imageUrl) {
+                                $this->redis->set(sprintf("%s:%s:%s", "queue", "image-worker", UUID::v4()), $imageUrl);
+                            }
+
+                            $this->redis->set("memory:ingester:feed", memory_get_usage());
+                        }catch (\Exception $e){
+                            echo $e->getMessage()."\n";
                         }
-
-                        $productWorker->waitForAllWorkers();
                     }
                 }
-            ));
+            }
+        ));
 
-        foreach($feeds as $feed){
-           $feedWorkerPool->run($feed);
+        while($feed = array_shift($feeds)){
+            printf("Feed length: %d\n", count($feeds));
+            $feedWorkerPool->run($feed);
         }
-
         $feedWorkerPool->waitForAllWorkers();
     }
 }
