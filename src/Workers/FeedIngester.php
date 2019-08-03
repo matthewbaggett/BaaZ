@@ -101,7 +101,7 @@ class FeedIngester extends GenericWorker
                                 $this->redis->set(sprintf('%s:%s:%s', 'queue', 'image-worker', UUID::v4()), $imageUrl);
                             }
 
-                            $this->redis->set('memory:ingester:feed', memory_get_usage());
+                            $this->redis->set('memory:ingester:feed:' . gethostname(), memory_get_usage());
                         } catch (\Exception $e) {
                             echo $e->getMessage()."\n";
                         }

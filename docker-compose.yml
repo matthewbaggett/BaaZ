@@ -10,6 +10,7 @@ services:
       context: .
       target: frontend
     image: registry.gone.io/baaz/frontend
+    restart: always
     ports:
       - 127.0.0.20:80:80
     volumes:
@@ -32,6 +33,7 @@ services:
       context: .
       target: backend
     image: registry.gone.io/baaz/backend
+    restart: always
     ports:
       - 127.0.0.20:81:80
     volumes:
@@ -49,6 +51,7 @@ services:
       context: .
       target: worker-feed
     image: registry.gone.io/baaz/worker
+    restart: always
     volumes:
       - ./:/app
     depends_on:
@@ -61,6 +64,7 @@ services:
 
   redis-frontend:
     image: redis:5
+    restart: always
     ports:
       - 127.0.0.20:6378:6379
     command: redis-server --appendonly yes
@@ -74,6 +78,7 @@ services:
 
   redis-backend:
     image: redis:5
+    restart: always
     ports:
       - 127.0.0.20:6379:6379
     command: redis-server --appendonly yes
@@ -89,6 +94,7 @@ services:
 
   redis-monitor-frontend:
     image: redis:5
+    restart: always
     command: redis-cli -h redis-frontend MONITOR
     depends_on:
       redis-frontend:
@@ -96,6 +102,7 @@ services:
 
   redis-monitor-backend:
     image: redis:5
+    restart: always
     command: redis-cli -h redis-backend MONITOR
     depends_on:
       redis-backend:
