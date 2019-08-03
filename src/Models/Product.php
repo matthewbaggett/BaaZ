@@ -46,7 +46,12 @@ class Product extends MultiMediaModel
                     return $this->{$k};
                 }
 
-                throw new \Exception(sprintf('%s does not contain property %s', __CLASS__, $k));
+                throw new \Exception(sprintf(
+                    '%s does not contain property %s in %s',
+                    __CLASS__,
+                    $k,
+                    '['.implode(', ', array_keys(get_object_vars($this))).']'
+                ));
 
                 break;
             case 'set':
@@ -59,7 +64,12 @@ class Product extends MultiMediaModel
                     return $this;
                 }
 
-                throw new \Exception(sprintf('%s does not contain property %s', __CLASS__, $k));
+                throw new \Exception(sprintf(
+                    '%s does not contain property %s in %s',
+                    __CLASS__,
+                    $k,
+                    '['.implode(', ', array_keys(get_object_vars($this))).']'
+                ));
 
                 break;
             default:
@@ -163,9 +173,17 @@ class Product extends MultiMediaModel
     public function getSlug(): string
     {
         return sprintf(
-            '/p/%s/%s',
-            substr((string) $this->getUUID(), 0, 7),
-            substr(preg_replace('/[^A-Za-z0-9 ]/', '', $this->getName()), 0, 40)
+            'p/%s/%s',
+            $this->getUuid(), //substr((string) $this->getUuid(), 0, 7),
+            str_replace(
+                ' ',
+                '-',
+                substr(
+                    preg_replace('/[^A-Za-z0-9 ]/', '', $this->getName()),
+                    0,
+                    40
+                )
+            )
         );
     }
 }
