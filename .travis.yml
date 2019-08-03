@@ -19,12 +19,14 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   - composer global require -q hirak/prestissimo
 
-script:
+before_script:
+  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
   - composer install
+
+script:
   - docker-compose build $CONTAINER
 
-before_deploy:
-  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+after_script:
   - docker-compose push $CONTAINER
 
 notifications:
