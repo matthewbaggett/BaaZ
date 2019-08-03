@@ -2,32 +2,14 @@ language: php
 
 php:
   - 7.3
-  - 7.4snapshot
-  - nightly
-
-matrix:
-  allow_failures:
-    - php: 7.4snapshot
-    - php: nightly
-
-before_script:
-  - make setup
 
 script:
-  - make test
+  - make build
+
+before_deploy:
+  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+  - make push
 
 notifications:
   email:
     - matthew@baggett.me
-
-deploy:
-  fqdn: rolodex.benzine.io
-  project_name: Rol⌬dex Application
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  keep_history: true
-  on:
-    branch: master
-  local_dir: build/phpunit-report
-  committer_from_gh: true

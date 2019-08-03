@@ -1,12 +1,12 @@
 setup:
-	composer update
+	composer update --ignore-platform-reqs
 
 clean:
 	docker-compose down -v --remove-orphans
 	-vendor/bin/php-cs-fixer fix
 
 build:
-	composer install
+	composer install --ignore-platform-reqs
 	docker-compose build --pull
 
 push:
