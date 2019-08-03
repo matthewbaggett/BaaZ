@@ -1,4 +1,5 @@
 <?php
+
 namespace Baaz\Models;
 
 class Product extends MultiMediaModel
@@ -37,40 +38,46 @@ class Product extends MultiMediaModel
 
     public function __call($name, $arguments)
     {
-        $k = lcfirst(substr($name,3));
+        $k = lcfirst(substr($name, 3));
 
-        switch(substr($name,0,3)){
+        switch (substr($name, 0, 3)) {
             case 'get':
-                if(property_exists($this, $k)){
-                    return $this->$k;
+                if (property_exists($this, $k)) {
+                    return $this->{$k};
                 }
-                throw new \Exception(sprintf("%s does not contain property %s", __CLASS__, $k));
+
+                throw new \Exception(sprintf('%s does not contain property %s', __CLASS__, $k));
+
                 break;
             case 'set':
-                if(property_exists($this, $k)){
-                    if($this->$k != $arguments[0]) {
-                        $this->$k = $arguments[0];
+                if (property_exists($this, $k)) {
+                    if ($this->{$k} != $arguments[0]) {
+                        $this->{$k} = $arguments[0];
                         $this->__isDirty = true;
                     }
+
                     return $this;
                 }
-                throw new \Exception(sprintf("%s does not contain property %s", __CLASS__, $k));
+
+                throw new \Exception(sprintf('%s does not contain property %s', __CLASS__, $k));
+
                 break;
             default:
-                throw new \Exception(sprintf("%s does not contain function %s", __CLASS__, $name));
+                throw new \Exception(sprintf('%s does not contain function %s', __CLASS__, $name));
         }
     }
 
-    protected function __map(array $inputData, array $mapping) : self
+    protected function __map(array $inputData, array $mapping): self
     {
-        foreach($inputData as $k => $v){
+        foreach ($inputData as $k => $v) {
             $setter = isset($mapping[$k]) ? "set{$mapping[$k]}" : "set{$k}";
-            $this->$setter($v);
+            $this->{$setter}($v);
         }
+
         return $this;
     }
 
-    public function ingest($json) : self
+    public function ingest($json): self
     {
         return $this->__map(
             $json,
@@ -88,47 +95,48 @@ class Product extends MultiMediaModel
         );
     }
 
-    public function load($uuid) : self
+    public function load($uuid): self
     {
         $keySpace = sprintf(
-            "%s:{%s}:",
-            "product",
+            '%s:{%s}:',
+            'product',
             $uuid
         );
 
         // @todo replace this with a scan
-        $keysToFetch = $this->__redis->keys($keySpace . "*");
+        $keysToFetch = $this->__redis->keys($keySpace.'*');
         $mgetResult = $this->__redis->mget($keysToFetch);
         $data = array_combine($keysToFetch, $mgetResult);
 
-        foreach($data as $k => $v){
-            $k = str_replace($keySpace,"", $k);
+        foreach ($data as $k => $v) {
+            $k = str_replace($keySpace, '', $k);
             $setter = "set{$k}";
-            $this->$setter($v);
+            $this->{$setter}($v);
         }
+
         return $this;
     }
 
-    public function save() : self
+    public function save(): self
     {
-        if(!$this->__isDirty){
+        if (!$this->__isDirty) {
             return $this;
         }
 
         $keysCount = 0;
-        foreach(get_object_vars($this) as $k => $v){
-            if(substr($k, 0,2) == '__'){
+        foreach (get_object_vars($this) as $k => $v) {
+            if ('__' == substr($k, 0, 2)) {
                 continue;
             }
-            if($v) {
-                $keysCount++;
+            if ($v) {
+                ++$keysCount;
                 $key = sprintf(
-                    "%s:{%s}:%s",
-                    "product",
+                    '%s:{%s}:%s',
+                    'product',
                     $this->uuid->__toString(),
                     $k
                 );
-                if(is_object($v) || is_array($v)){
+                if (is_object($v) || is_array($v)) {
                     $v = \GuzzleHttp\json_encode($v);
                 }
                 $this->__redis->set($key, $v);
@@ -136,17 +144,28 @@ class Product extends MultiMediaModel
         }
 
         printf(
-            "Wrote %s to Redis as %d keys" . PHP_EOL,
+            'Wrote %s to Redis as %d keys ( %s )'.PHP_EOL,
             $this->name,
-            $keysCount
+            $keysCount,
+            sprintf('http://baaz.local/%s', $this->getSlug())
         );
 
         return $this;
     }
 
-    public function getCacheableImageUrls(){
+    public function getCacheableImageUrls()
+    {
         return [
             $this->imageURL,
         ];
+    }
+
+    public function getSlug(): string
+    {
+        return sprintf(
+            '/p/%s/%s',
+            substr((string) $this->getUUID(), 0, 7),
+            substr(preg_replace('/[^A-Za-z0-9 ]/', '', $this->getName()), 0, 40)
+        );
     }
 }

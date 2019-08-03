@@ -8,7 +8,7 @@ services:
   frontend:
     build:
       context: .
-      target: web
+      target: frontend
     image: registry.gone.io/baaz/frontend
     ports:
       - 127.0.0.20:80:80
@@ -30,7 +30,7 @@ services:
   backend:
     build:
       context: .
-      target: web
+      target: backend
     image: registry.gone.io/baaz/backend
     ports:
       - 127.0.0.20:81:80
@@ -47,7 +47,7 @@ services:
   worker-feed:
     build:
       context: .
-      target: worker
+      target: worker-feed
     image: registry.gone.io/baaz/worker
     volumes:
       - ./:/app

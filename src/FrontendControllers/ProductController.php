@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -11,7 +12,6 @@ use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
 use ⌬\Redis\Redis;
-use GuzzleHttp\Client as GuzzleClient;
 
 class ProductController extends HtmlController
 {
@@ -37,26 +37,13 @@ class ProductController extends HtmlController
         $this->logger = $logger;
 
         $this->guzzle = new GuzzleClient([
-            'base_uri' => "http://backend",
-            'timeout' => 2.0
+            'base_uri' => 'http://backend',
+            'timeout' => 2.0,
         ]);
     }
 
-    protected function apiRequest(string $method = 'GET', string $url){
-        $start = microtime(true);
-        $response = $this->guzzle->request($method, $url);
-        $timeToGet = microtime(true) - $start;
-        $this->logger->critical(sprintf(
-            "API Took %sms to load  %s",
-            number_format($timeToGet*1000),
-            $url
-        ));
-        $response->getBody()->rewind();
-        $response = \GuzzleHttp\json_decode($response->getBody()->getContents());
-        return $response;
-    }
-
     /**
+     * @route GET p/{productUUID}/{slug}
      * @route GET product/{productUUID}
      *
      * @param Request  $request
@@ -67,11 +54,26 @@ class ProductController extends HtmlController
     public function product(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $productUUID = $request->getAttribute('productUUID');
-        
-        $productResponse = $this->apiRequest("GET", "api/product/{$productUUID}");
+
+        $productResponse = $this->apiRequest('GET', "api/product/{$productUUID}");
 
         $this->setTitle($productResponse->Product->Name);
 
-        return $this->renderHtml($request, $response, "Product/Show.twig", (array) $productResponse);
+        return $this->renderHtml($request, $response, 'Product/Show.twig', (array) $productResponse);
+    }
+
+    protected function apiRequest(string $method = 'GET', string $url)
+    {
+        $start = microtime(true);
+        $response = $this->guzzle->request($method, $url);
+        $timeToGet = microtime(true) - $start;
+        $this->logger->critical(sprintf(
+            'API Took %sms to load  %s',
+            number_format($timeToGet * 1000),
+            $url
+        ));
+        $response->getBody()->rewind();
+
+        return \GuzzleHttp\json_decode($response->getBody()->getContents());
     }
 }

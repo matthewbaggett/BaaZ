@@ -1,4 +1,5 @@
 <?php
+
 namespace Baaz\Workers;
 
 use Baaz\Models\Product;
@@ -19,6 +20,7 @@ use ⌬\UUID\UUID;
 
 class FeedIngester
 {
+    public const CACHE_PATH = __DIR__.'/../../cache/';
     /** @var GuzzleClient */
     protected $guzzle;
 
@@ -28,13 +30,10 @@ class FeedIngester
     /** @var WorkerPool */
     protected $workerPool;
 
-    const CACHE_PATH = __DIR__ . "/../../cache/";
-
     public function __construct(
         Redis $redis,
         EnvironmentService $environmentService
-    )
-    {
+    ) {
         $this->redis = $redis;
         $this->environmentService = $environmentService;
         $stack = HandlerStack::create();
@@ -55,21 +54,22 @@ class FeedIngester
         $this->guzzle = new GuzzleClient(['handler' => $stack]);
     }
 
-    public function getNewWorkerPool() : WorkerPool
+    public function getNewWorkerPool(): WorkerPool
     {
         $workerPool = new WorkerPool();
         $cpuCoreCount = Detector::detect();
-        $threadCount = $cpuCoreCount *$this->environmentService->get("THREAD_MULTIPLE", 1.0);
+        $threadCount = $cpuCoreCount * $this->environmentService->get('THREAD_MULTIPLE', 1.0);
 
         $threadCount = clamp(1, floor($threadCount), $cpuCoreCount * 2);
 
         $workerPool->setWorkerPoolSize($threadCount);
+
         return $workerPool;
     }
 
-    public function run() : void
+    public function run(): void
     {
-        $feeds = $this->guzzle->get("https://tt_shops:tt_shops!@api.shop2market.com/api/v1/publishers/1885/feeds.json");
+        $feeds = $this->guzzle->get('https://tt_shops:tt_shops!@api.shop2market.com/api/v1/publishers/1885/feeds.json');
 
         $feeds = \GuzzleHttp\json_decode($feeds->getBody()->getContents(), true);
 
@@ -78,9 +78,9 @@ class FeedIngester
         $feedWorkerPool = $this->getNewWorkerPool();
 
         $feedWorkerPool->create(new ClosureWorker(
-            function($feed, Semaphore $semaphore, \ArrayObject $storage){
+            function ($feed, Semaphore $semaphore, \ArrayObject $storage) {
                 extract($feed);
-                /**
+                /*
                  * @var $start_date
                  * @var $end_date
                  * @var $publisher_id
@@ -94,9 +94,9 @@ class FeedIngester
 
                 \Kint::dump($feeds);
 
-                if(strtotime($start_date) < time() && strtotime($end_date) > time() && $active){
-                    $ljsonGzPath = self::CACHE_PATH . "{$publisher_id}_{$shop_id}.ljson.gz";
-                    if(!file_exists($ljsonGzPath) || filemtime($ljsonGzPath) < time() - 86400) {
+                if (strtotime($start_date) < time() && strtotime($end_date) > time() && $active) {
+                    $ljsonGzPath = self::CACHE_PATH."{$publisher_id}_{$shop_id}.ljson.gz";
+                    if (!file_exists($ljsonGzPath) || filemtime($ljsonGzPath) < time() - 86400) {
                         $channelFeedJsonLinesRequest = $this->guzzle->get($feeds['json.gz']);
                         $channelFeedJsonLinesRequest->getBody()->rewind();
 
@@ -104,19 +104,19 @@ class FeedIngester
                         file_put_contents($ljsonGzPath, $channelFeedJsonLinesCompressed);
                     }
 
-                    foreach(gzfile($ljsonGzPath) as $jsonLine){
+                    foreach (gzfile($ljsonGzPath) as $jsonLine) {
                         try {
                             $product = new Product($this->redis);
                             $json = \GuzzleHttp\json_decode($jsonLine, true);
                             $product->ingest($json);
                             $product->save();
 
-                            foreach($product->getCacheableImageUrls() as $imageUrl) {
-                                $this->redis->set(sprintf("%s:%s:%s", "queue", "image-worker", UUID::v4()), $imageUrl);
+                            foreach ($product->getCacheableImageUrls() as $imageUrl) {
+                                $this->redis->set(sprintf('%s:%s:%s', 'queue', 'image-worker', UUID::v4()), $imageUrl);
                             }
 
-                            $this->redis->set("memory:ingester:feed", memory_get_usage());
-                        }catch (\Exception $e){
+                            $this->redis->set('memory:ingester:feed', memory_get_usage());
+                        } catch (\Exception $e) {
                             echo $e->getMessage()."\n";
                         }
                     }
@@ -124,7 +124,7 @@ class FeedIngester
             }
         ));
 
-        while($feed = array_shift($feeds)){
+        while ($feed = array_shift($feeds)) {
             printf("Feed length: %d\n", count($feeds));
             $feedWorkerPool->run($feed);
         }

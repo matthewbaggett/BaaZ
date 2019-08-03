@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -11,7 +12,6 @@ use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
 use ⌬\Redis\Redis;
-use GuzzleHttp\Client as GuzzleClient;
 
 class DemoController extends HtmlController
 {
@@ -37,8 +37,8 @@ class DemoController extends HtmlController
         $this->logger = $logger;
 
         $this->guzzle = new GuzzleClient([
-            'base_uri' => "http://" . gethostname(),
-            'timeout' => 2.0
+            'base_uri' => 'http://'.gethostname(),
+            'timeout' => 2.0,
         ]);
     }
 
@@ -52,7 +52,8 @@ class DemoController extends HtmlController
      */
     public function product(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $this->setTitle("Demo of Widgits");
-        return $this->renderHtml($request, $response, "Template/Demo.twig");
+        $this->setTitle('Demo of Widgits');
+
+        return $this->renderHtml($request, $response, 'Template/Demo.twig');
     }
 }
