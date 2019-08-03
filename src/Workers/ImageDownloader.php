@@ -2,38 +2,44 @@
 
 namespace Baaz\Workers;
 
-use Baaz\Models\Product;
-use Doctrine\Common\Cache\FilesystemCache;
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\HandlerStack;
-use Kevinrob\GuzzleCache\CacheMiddleware;
-use Kevinrob\GuzzleCache\KeyValueHttpHeader;
-use Kevinrob\GuzzleCache\Storage\DoctrineCacheStorage;
-use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
+use Predis\Client as Predis;
+use Predis\Collection\Iterator;
 use QXS\WorkerPool\ClosureWorker;
 use QXS\WorkerPool\Semaphore;
-use QXS\WorkerPool\WorkerPool;
-use WyriHaximus\CpuCoreDetector\Detector;
-use ⌬\Redis\Redis;
 use ⌬\Services\EnvironmentService;
-use ⌬\UUID\UUID;
 
 class ImageDownloader extends GenericWorker
 {
     public const CACHE_PATH = __DIR__.'/../../cache/';
 
-    /** @var Redis */
-    protected $redis;
+    /** @var Predis */
+    protected $predis;
 
     public function __construct(
-        Redis $redis,
+        Predis $predis,
         EnvironmentService $environmentService
     ) {
-        $this->redis = $redis;
+        $this->predis = $predis;
         parent::__construct($environmentService);
     }
 
-    public function run(){
-        $this->redis->get
+    public function run()
+    {
+        $imageWorkerPool = $this->getNewWorkerPool();
+
+        $imageWorkerPool->create(new ClosureWorker(
+            function ($null, Semaphore $semaphore, \ArrayObject $storage) {
+                $pipeline = $this->predis->pipeline();
+                $iter = new Iterator\Keyspace($this->predis, 'queue:image-worker', 1);
+                foreach ($iter as $index => $value) {
+                    \Kint::dump($index, $value);
+                }
+            }
+        ));
+
+        while ($imageWorkerPool->waitForOneFreeWorker()) {
+            $imageWorkerPool->run(null);
+        }
+        $imageWorkerPool->waitForAllWorkers();
     }
 }

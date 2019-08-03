@@ -50,7 +50,23 @@ services:
     build:
       context: .
       target: worker-feed
-    image: registry.gone.io/baaz/worker
+    image: registry.gone.io/baaz/worker-feed
+    restart: always
+    volumes:
+      - ./:/app
+    depends_on:
+      redis-backend:
+        condition: service_healthy
+    environment:
+      REDIS_HOST: tcp://redis-backend:6379
+      THREAD_MULTIPLE: 0.25
+    cpus: 0.50
+
+  worker-images:
+    build:
+      context: .
+      target: worker-images
+    image: registry.gone.io/baaz/worker-images
     restart: always
     volumes:
       - ./:/app

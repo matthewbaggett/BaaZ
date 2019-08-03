@@ -10,5 +10,5 @@ use ⌬\⌬;
     'config' => __DIR__ . "/../.benzine.yml",
 ])
     ->getContainer()
-    ->get(Workers\WriteToDatabase::class)
+    ->get(Workers\ImageDownloader::class)
     ->run();

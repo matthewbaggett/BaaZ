@@ -3,6 +3,7 @@
 namespace Baaz\Controllers;
 
 use Baaz\Models\Product;
+use Predis\Client as Predis;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -10,20 +11,19 @@ use Slim\Http\Response;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\Controller;
 use ⌬\Log\Logger;
-use ⌬\Redis\Redis;
 
 class ProductApiController extends Controller
 {
     /** @var Configuration */
     private $configuration;
-    /** @var Redis */
+    /** @var Predis */
     private $redis;
     /** @var Logger */
     private $logger;
 
     public function __construct(
         Configuration $configuration,
-        Redis $redis,
+        Predis $redis,
         Logger $logger
     ) {
         $this->configuration = $configuration;

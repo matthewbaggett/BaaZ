@@ -2,21 +2,20 @@
 
 namespace Baaz\Models;
 
-use ⌬\Redis\Redis;
+use Predis\Client as Predis;
 use ⌬\UUID\UUIDValue;
 
 class MultiMediaModel
 {
-    /** @var Redis */
-    protected $__redis;
-
     /** @var UUIDValue */
     protected $uuid;
+    /** @var Predis */
+    private $__predis;
 
     public function __construct(
-        Redis $redis
+        Predis $predis
     ) {
-        $this->__redis = $redis;
+        $this->__predis = $predis;
         $this->uuid = new UUIDValue();
     }
 
@@ -34,5 +33,13 @@ class MultiMediaModel
         }
 
         return $array;
+    }
+
+    /**
+     * @return Predis
+     */
+    public function getRedis(): Predis
+    {
+        return $this->__predis;
     }
 }

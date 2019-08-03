@@ -25,3 +25,13 @@ COPY feed-ingester.runit /etc/service/feed-ingester/run
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD ps aux | grep -v grep | grep feed-ingester
 
+FROM gone/php:cli AS worker-images
+
+# Enable PCNTL
+RUN sed -i 's|disable_functions|#disabled_functions|g' /etc/php/*/cli/php.ini
+
+COPY image-downloader.runit /etc/service/image-downloader/run
+
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD ps aux | grep -v grep | grep image-downloader
+

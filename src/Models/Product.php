@@ -2,6 +2,8 @@
 
 namespace Baaz\Models;
 
+use Predis\Pipeline\Pipeline;
+
 class Product extends MultiMediaModel
 {
     protected $brand;
@@ -107,19 +109,11 @@ class Product extends MultiMediaModel
 
     public function load($uuid): self
     {
-        $keySpace = sprintf(
-            '%s:{%s}:',
-            'product',
-            $uuid
-        );
+        $key = sprintf('%s:%s', 'product', $uuid);
 
-        // @todo replace this with a scan
-        $keysToFetch = $this->__redis->keys($keySpace.'*');
-        $mgetResult = $this->__redis->mget($keysToFetch);
-        $data = array_combine($keysToFetch, $mgetResult);
+        $hmgetResult = array_combine($this->getValidFields(), $this->getRedis()->hmget($key, $this->getValidFields()));
 
-        foreach ($data as $k => $v) {
-            $k = str_replace($keySpace, '', $k);
+        foreach ($hmgetResult as $k => $v) {
             $setter = "set{$k}";
             $this->{$setter}($v);
         }
@@ -127,36 +121,44 @@ class Product extends MultiMediaModel
         return $this;
     }
 
-    public function save(): self
+    public function save(Pipeline $pipeline = null, $savePipeline = true): self
     {
         if (!$this->__isDirty) {
             return $this;
         }
 
-        $keysCount = 0;
-        foreach (get_object_vars($this) as $k => $v) {
-            if ('__' == substr($k, 0, 2)) {
-                continue;
-            }
-            if ($v) {
-                ++$keysCount;
-                $key = sprintf(
-                    '%s:{%s}:%s',
-                    'product',
-                    $this->uuid->__toString(),
-                    $k
-                );
-                if (is_object($v) || is_array($v)) {
-                    $v = \GuzzleHttp\json_encode($v);
+        if (!$pipeline) {
+            $pipeline = $this->getRedis()->pipeline();
+        }
+
+        $dict = [];
+        foreach ($this->getValidFields() as $field) {
+            if ($this->{$field}) {
+                if (is_object($this->{$field}) || is_array($this->{$field})) {
+                    $this->{$field} = \GuzzleHttp\json_encode($this->{$field});
                 }
-                $this->__redis->set($key, $v);
+                $dict[$field] = $this->{$field};
             }
         }
 
+        $pipeline->hmset(
+            sprintf(
+                '%s:%s',
+                'product',
+                $this->uuid->__toString(),
+            ),
+            $dict
+        );
+
+        if ($savePipeline) {
+            $pipeline->flushPipeline(true);
+        }
+
         printf(
-            'Wrote %s to Redis as %d keys ( %s )'.PHP_EOL,
+            '%s %s to Redis as %d keys ( %s )'.PHP_EOL,
+            $savePipeline ? 'Wrote' : 'Queued',
             $this->name,
-            $keysCount,
+            count($dict),
             sprintf('http://baaz.local/%s', $this->getSlug())
         );
 
@@ -185,5 +187,18 @@ class Product extends MultiMediaModel
                 )
             )
         );
+    }
+
+    private function getValidFields(): array
+    {
+        $valid = [];
+        foreach (array_keys(get_object_vars($this)) as $field) {
+            if ('__' == substr($field, 0, 2)) {
+                continue;
+            }
+            $valid[] = $field;
+        }
+
+        return $valid;
     }
 }
