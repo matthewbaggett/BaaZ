@@ -24,6 +24,12 @@ volumes:
       type: none
       device: /media/fantec/docker/baaz/redis-backend
       o: bind
+  solr-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/solr
+      o: bind
   cache:
     driver: local
     driver_opts:
@@ -108,9 +114,12 @@ services:
       - ./src/BackendControllers:/app/src/Controllers:ro
     environment:
       REDIS_HOST: tcp://redis-backend:6379
+      SOLR_HOST: tcp://solr:8983
     depends_on:
       redis-backend:
         condition: service_healthy
+      solr:
+        condition: service_started
     cpus: 0.50
     networks:
       - public
@@ -160,6 +169,27 @@ services:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
+      THREAD_MULTIPLE: 0.25
+    cpus: 0.20
+
+  worker-solr:
+    build:
+      context: .
+      target: worker-solr
+    image: registry.gone.io/baaz/worker-solr
+    restart: always
+    volumes:
+      - ./:/app
+    networks:
+      - private
+    depends_on:
+      redis-backend:
+        condition: service_healthy
+      solr:
+        condition: service_started
+    environment:
+      REDIS_HOST: tcp://redis-backend:6379
+      SOLR_HOST: tcp://solr:8983
       THREAD_MULTIPLE: 0.25
     cpus: 0.20
 
@@ -263,3 +293,17 @@ services:
       - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.frontend.rule=Host:reddie.baaz.local"
       - "traefik.docker.network=baaz_public"
+
+  solr:
+    image: solr
+    restart: always
+    ports:
+      - "127.0.0.20:8983:8983"
+    networks:
+      - private
+    volumes:
+      - solr-persist:/opt/solr/server/solr/mycores
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - mycore
