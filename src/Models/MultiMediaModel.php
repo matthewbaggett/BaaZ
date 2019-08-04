@@ -2,12 +2,14 @@
 
 namespace Baaz\Models;
 
+use Baaz\Baaz;
 use Predis\Client as Predis;
 use Predis\Pipeline\Pipeline;
+use Solarium\Core\Query\DocumentInterface;
 use Westsworld\TimeAgo;
 use ⌬\UUID\UUID;
 
-class MultiMediaModel
+class MultiMediaModel implements DocumentInterface
 {
     /** @var string */
     protected $uuid;
@@ -19,12 +21,20 @@ class MultiMediaModel
     /** @var TimeAgo */
     private $__timeAgo;
 
-    public function __construct(
-        Predis $predis
-    ) {
-        $this->__predis = $predis;
+    public function __construct($query = [], $response = null)
+    {
+        $this->__predis = Baaz::Container()->get(Predis::class);
         $this->uuid = UUID::v4();
         $this->__timeAgo = new TimeAgo();
+        foreach ($query as $field => $value) {
+            $field = lcfirst($field);
+            if (is_array($value)) {
+                $value = reset($value);
+            }
+            if (property_exists($this, $field)) {
+                $this->{$field} = $value;
+            }
+        }
     }
 
     public function __call($name, $arguments)
@@ -71,7 +81,7 @@ class MultiMediaModel
     public function __toArray()
     {
         $array = [];
-        foreach ($this->getValidFields() as $field) {
+        foreach ($this->getFields() as $field) {
             $array[ucfirst($field)] = $this->{$field};
         }
 
@@ -128,7 +138,7 @@ class MultiMediaModel
         $this->setUuid($uuid);
         $key = $this->getStorageKey();
 
-        $fields = $this->getValidFields();
+        $fields = $this->getFields();
         $values = $this->getRedis()->hmget($key, $fields);
         $hmgetResult = array_combine($fields, $values);
         //\Kint::dump($key, $fields, $values, $hmgetResult);
@@ -152,7 +162,7 @@ class MultiMediaModel
         }
 
         $dict = [];
-        foreach ($this->getValidFields() as $field) {
+        foreach ($this->getFields() as $field) {
             if ($this->{$field}) {
                 if (is_object($this->{$field}) || is_array($this->{$field})) {
                     $this->{$field} = \GuzzleHttp\json_encode($this->{$field});
@@ -181,6 +191,19 @@ class MultiMediaModel
         return $this;
     }
 
+    public function getFields(): array
+    {
+        $valid = [];
+        foreach (array_keys(get_object_vars($this)) as $field) {
+            if ('__' == substr($field, 0, 2)) {
+                continue;
+            }
+            $valid[] = $field;
+        }
+
+        return $valid;
+    }
+
     protected function getStorageKey(): string
     {
         return sprintf(
@@ -195,18 +218,5 @@ class MultiMediaModel
         $classElem = explode('\\', get_called_class());
 
         return strtolower(end($classElem));
-    }
-
-    private function getValidFields(): array
-    {
-        $valid = [];
-        foreach (array_keys(get_object_vars($this)) as $field) {
-            if ('__' == substr($field, 0, 2)) {
-                continue;
-            }
-            $valid[] = $field;
-        }
-
-        return $valid;
     }
 }

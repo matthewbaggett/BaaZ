@@ -67,9 +67,11 @@ class ProductController extends HtmlController
      */
     public function homepage(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $productsResponse = $this->apiRequest('GET', 'v1/api/products?random&count=20');
+        $numProducts = 50;
 
-        $this->setTitle('20 Random Products!');
+        $productsResponse = $this->apiRequest('GET', "v1/api/random?perPage={$numProducts}");
+
+        $this->setTitle("{$numProducts} Random Products!");
 
         $this->addCss(__DIR__.'/../../assets/starbursts.css');
 

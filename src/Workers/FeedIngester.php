@@ -59,7 +59,7 @@ class FeedIngester extends GenericWorker
                         ++$queuedRecords;
 
                         try {
-                            $product = new Product($this->predis);
+                            $product = new Product();
                             $json = \GuzzleHttp\json_decode($jsonLine, true);
                             $product->ingest($json);
                             $product->save($pipeline);
@@ -74,12 +74,6 @@ class FeedIngester extends GenericWorker
                                     ]
                                 );
                             }
-
-                            // And add the product to a queue for the solr-loader
-                            $pipeline->set(
-                                sprintf('%s:%s:%s', 'queue', 'solr-loader', UUID::v4()),
-                                $product->getUuid()
-                            );
 
                             //Set memory usage statistic in redis.
                             $pipeline->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_usage());

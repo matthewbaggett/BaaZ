@@ -40,7 +40,7 @@ class SolrIngester extends GenericWorker
             foreach (new Keyspace($this->predis, $match) as $key) {
                 $productUUID = $this->predis->get($key);
                 /** @var Product $product */
-                $product = (new Product($this->predis))->load($productUUID);
+                $product = (new Product())->load($productUUID);
                 $update = $solr->createUpdate();
 
                 $document = $product->createSolrDocument($update);

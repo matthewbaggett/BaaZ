@@ -148,7 +148,7 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 60000
+      DELAY_PER_ITEM_MS: 10000
     cpus: 0.20
 
   worker-images:

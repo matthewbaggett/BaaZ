@@ -1,11 +1,16 @@
 setup:
 	composer update --ignore-platform-reqs
 
-clean:
-	sudo chown $(USER):$(USER) . -R
-	docker-compose down --remove-orphans
+clean-code:
 	chmod +x *.runit bin/*
 	-vendor/bin/php-cs-fixer fix
+
+clean-perms:
+	sudo chown $(USER):$(USER) . -R
+clean-docker:
+	docker-compose down --remove-orphans
+
+clean: clean-perms clean-docker clean-code
 
 build:
 	composer install --ignore-platform-reqs

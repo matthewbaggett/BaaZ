@@ -97,7 +97,7 @@
                             <div class="star">
                                 <a href="/{{ Product.Slug }}" class="starburst">
                                     <span>
-                                        &euro;{{ Product.Price }}
+                                        &euro;{{ Product.Price | number_format(2, '.', ',') }}
                                     </span>
                                 </a>
                             </div>

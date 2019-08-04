@@ -4,7 +4,6 @@ namespace Baaz\Models;
 
 use Baaz\Baaz;
 use Baaz\Filesystem\ImageFilesystem;
-use Predis\Client as Predis;
 
 class Image extends File
 {
@@ -13,11 +12,10 @@ class Image extends File
     protected $productUUID;
 
     public function __construct(
-        ImageFilesystem $imageFilesystem,
-        Predis $predis
+        ImageFilesystem $imageFilesystem
     ) {
         $this->__imageFilesystem = $imageFilesystem;
-        parent::__construct($predis);
+        parent::__construct();
     }
 
     public function __toArray()

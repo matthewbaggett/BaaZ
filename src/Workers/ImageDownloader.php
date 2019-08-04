@@ -7,6 +7,7 @@ use Baaz\Workers\Traits\GuzzleWorkerTrait;
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
 use ⌬\Services\EnvironmentService;
+use ⌬\UUID\UUID;
 
 class ImageDownloader extends GenericWorker
 {
@@ -55,6 +56,12 @@ class ImageDownloader extends GenericWorker
                 $picturesUUIDs[] = $image->getUuid();
 
                 $pipeline->hset("product:{$work['product']}", 'pictures', json_encode($picturesUUIDs));
+
+                // And add the product to a queue for the solr-loader
+                $pipeline->set(
+                    sprintf('%s:%s:%s', 'queue', 'solr-loader', UUID::v4()),
+                    $work['product']
+                );
 
                 if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
                     $pipeline->flushPipeline();

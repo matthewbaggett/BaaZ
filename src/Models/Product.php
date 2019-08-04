@@ -43,6 +43,19 @@ class Product extends MultiMediaModel
     /** @var Image[] */
     protected $__relatedImages = [];
 
+    public function __construct($query = [], $response = null)
+    {
+        parent::__construct($query, $response);
+        if(!empty($query) && isset($query['Images'])){
+            foreach($query['Images'] as $imageJson){
+                $imageJson = json_decode($imageJson, true);
+                foreach($imageJson as $image) {
+                    $this->__relatedImages[] = Image::Factory()->load($image['Uuid']);
+                }
+            }
+        }
+    }
+
     protected function __map(array $inputData, array $mapping): self
     {
         foreach ($inputData as $k => $v) {
@@ -70,11 +83,6 @@ class Product extends MultiMediaModel
                 'Images' => $images,
             ]
         );
-    }
-
-    protected function getReferringDomain(){
-        $url = parse_url($this->deeplink);
-        return substr($url['host'],0,4) == 'www.' ? substr($url['host'], 4) : $url['host'];
     }
 
     public function ingest($json): self
@@ -155,5 +163,16 @@ class Product extends MultiMediaModel
         }
 
         return $solrDocument;
+    }
+
+    protected function getReferringDomain()
+    {
+        $url = parse_url($this->deeplink);
+
+        if (isset($url['host'])) {
+            return 'www.' == substr($url['host'], 0, 4) ? substr($url['host'], 4) : $url['host'];
+        }
+
+        return 'Somewhere!';
     }
 }
