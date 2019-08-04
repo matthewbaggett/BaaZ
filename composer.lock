@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine.git",
-                "reference": "b250a4e3c70b12b1126b93b97895f820afd805ae"
+                "reference": "97672c42bf99dc36d9414c5b8019d3da2a98c1ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine/zipball/b250a4e3c70b12b1126b93b97895f820afd805ae",
-                "reference": "b250a4e3c70b12b1126b93b97895f820afd805ae",
+                "url": "https://api.github.com/repos/benzine-framework/benzine/zipball/97672c42bf99dc36d9414c5b8019d3da2a98c1ea",
+                "reference": "97672c42bf99dc36d9414c5b8019d3da2a98c1ea",
                 "shasum": ""
             },
             "require": {
@@ -63,7 +63,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:52:28+00:00"
+            "time": "2019-08-03T13:47:59+00:00"
         },
         {
             "name": "benzine/benzine-cache",
@@ -501,12 +501,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-redis.git",
-                "reference": "5e305da8da6fc2541f98589249a67b89d5d3de41"
+                "reference": "d3a8045d3c8cabef5c0f6e7495a336e6f4c645b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-redis/zipball/5e305da8da6fc2541f98589249a67b89d5d3de41",
-                "reference": "5e305da8da6fc2541f98589249a67b89d5d3de41",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-redis/zipball/d3a8045d3c8cabef5c0f6e7495a336e6f4c645b5",
+                "reference": "d3a8045d3c8cabef5c0f6e7495a336e6f4c645b5",
                 "shasum": ""
             },
             "require": {
@@ -530,7 +530,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:52:28+00:00"
+            "time": "2019-08-04T16:46:46+00:00"
         },
         {
             "name": "benzine/benzine-router",
@@ -811,12 +811,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-uuid.git",
-                "reference": "313f41c69dc6d6d104056ee4490083b6ff01e6d8"
+                "reference": "f74ea310720e3147395f8d5a360a31379017482a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-uuid/zipball/313f41c69dc6d6d104056ee4490083b6ff01e6d8",
-                "reference": "313f41c69dc6d6d104056ee4490083b6ff01e6d8",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-uuid/zipball/f74ea310720e3147395f8d5a360a31379017482a",
+                "reference": "f74ea310720e3147395f8d5a360a31379017482a",
                 "shasum": ""
             },
             "require": {
@@ -844,7 +844,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-03T00:52:28+00:00"
+            "time": "2019-08-04T01:56:53+00:00"
         },
         {
             "name": "bnf/slim3-psr15",
@@ -5591,16 +5591,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "8.3.2",
+            "version": "8.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "e77a49b6da82240f40ddd4be536d30d7dae5c168"
+                "reference": "c319d08ebd31e137034c84ad7339054709491485"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e77a49b6da82240f40ddd4be536d30d7dae5c168",
-                "reference": "e77a49b6da82240f40ddd4be536d30d7dae5c168",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c319d08ebd31e137034c84ad7339054709491485",
+                "reference": "c319d08ebd31e137034c84ad7339054709491485",
                 "shasum": ""
             },
             "require": {
@@ -5670,7 +5670,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2019-08-02T13:42:49+00:00"
+            "time": "2019-08-03T15:41:47+00:00"
         },
         {
             "name": "pimple/pimple",
