@@ -58,7 +58,7 @@ class ImageController extends HtmlController
     {
         $imageUUID = $request->getAttribute('imageUUID');
 
-        $imageResponse = $this->apiRequest('GET', "image/{$imageUUID}.json");
+        $imageResponse = $this->apiRequest('GET', "v1/image/{$imageUUID}.json");
 
         $file = $this->imageFilesystem->get($imageResponse['Image']['StoragePath']);
 

@@ -26,6 +26,7 @@ class Product extends MultiMediaModel
     protected $imageURL;
     protected $material;
     protected $name;
+    protected $pictures;
     protected $price;
     protected $productURL;
     protected $productId;
@@ -96,9 +97,14 @@ class Product extends MultiMediaModel
     {
         $return = parent::load($uuid);
 
-        $pictures = $this->getRedis()->lrange("product:{$uuid}:pictures", 0, 5);
-        foreach($pictures as &$picture){
-            $this->__relatedImages[] = Image::Factory()->load($picture);
+        if(is_string($this->pictures)){
+            $this->pictures = json_decode($this->pictures);
+        }
+
+        if(is_array($this->pictures) && count($this->pictures) > 0) {
+            foreach ($this->pictures as $picture) {
+                $this->__relatedImages[] = Image::Factory()->load($picture);
+            }
         }
 
         return $return;

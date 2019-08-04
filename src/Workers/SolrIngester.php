@@ -4,7 +4,6 @@ namespace Baaz\Workers;
 
 use Baaz\Models\Product;
 use Baaz\Workers\Traits\SolrWorkerTrait;
-use Solarium\Exception\ExceptionInterface as SolrException;
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
 use ⌬\Services\EnvironmentService;

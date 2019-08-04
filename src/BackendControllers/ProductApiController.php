@@ -4,6 +4,7 @@ namespace Baaz\Controllers;
 
 use Baaz\Models\Product;
 use Predis\Client as Predis;
+use Predis\Collection\Iterator\Keyspace;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -32,7 +33,7 @@ class ProductApiController extends Controller
     }
 
     /**
-     * @route GET api/product/{productUUID}.json
+     * @route GET v1/api/product/{productUUID}.json
      *
      * @param Request  $request
      * @param Response $response
@@ -48,6 +49,28 @@ class ProductApiController extends Controller
         return $response->withJson([
             'Status' => 'Okay',
             'Product' => $product->__toArray(),
+        ]);
+    }
+
+    /**
+     * @route GET v1/api/products
+     *
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return ResponseInterface
+     */
+    public function products(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $match = 'product:*';
+
+        $productUUIDs = $this->redis->scan(0, ['match' => $match, 'count' => 20]);
+
+        $products = [];
+
+        return $response->withJson([
+            'Status' => 'Okay',
+            'Products' => $products
         ]);
     }
 }

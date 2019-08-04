@@ -47,7 +47,14 @@ class ImageDownloader extends GenericWorker
                     ->setProductUUID($work['product'])
                     ->save($pipeline);
 
-                $pipeline->lpush("product:{$work['product']}:pictures", $image->getUuid());
+                $picturesUUIDs = $this->predis->hget("product:{$work['product']}", "pictures");
+                if(($picturesUUIDs = json_decode($picturesUUIDs)) === null){
+                    $picturesUUIDs = [];
+                }
+
+                $picturesUUIDs[] = $image->getUuid();
+
+                $pipeline->hset("product:{$work['product']}", "pictures", json_encode($picturesUUIDs));
 
                 if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
                     $pipeline->flushPipeline();

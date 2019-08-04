@@ -49,7 +49,7 @@ class ProductController extends HtmlController
     {
         $productUUID = $request->getAttribute('productUUID');
 
-        $productResponse = $this->apiRequest('GET', "api/product/{$productUUID}.json");
+        $productResponse = $this->apiRequest('GET', "v1/api/product/{$productUUID}.json");
 
         $this->setTitle($productResponse['Product']['Name']);
 
@@ -57,7 +57,7 @@ class ProductController extends HtmlController
     }
 
     /**
-     * @route GET /
+     * @route GET / weight=-10
      * @route GET l/random
      * @param RequestInterface $request
      * @param ResponseInterface $response
@@ -65,7 +65,7 @@ class ProductController extends HtmlController
      */
     public function homepage(RequestInterface $request, ResponseInterface $response) : ResponseInterface
     {
-        $productsResponse = $this->apiRequest("GET", "api/products");
+        $productsResponse = $this->apiRequest("GET", "v1/api/products?random&count=20");
 
         $this->setTitle("20 Random Products!");
 

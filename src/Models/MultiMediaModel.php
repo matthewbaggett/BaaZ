@@ -91,7 +91,7 @@ class MultiMediaModel
     {
         $array = [];
         foreach ($this->getValidFields() as $field){
-            $array[$field] = $this->{$field};
+            $array[ucfirst($field)] = $this->{$field};
         }
         return $array;
     }

@@ -39,7 +39,7 @@ class ImageController extends HtmlController
     }
 
     /**
-     * @route GET image/{imageUUID}.json
+     * @route GET v1/image/{imageUUID}.json
      *
      * @param Request  $request
      * @param Response $response
