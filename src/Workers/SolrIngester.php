@@ -45,7 +45,7 @@ class SolrIngester extends GenericWorker
                     $this->predis->del($key);
                     printf(
                         'Wrote Product %s to Solr, %d left in queue' . PHP_EOL,
-                        $product->getSlug(),
+                        "http://baaz.local/" . $product->getSlug(),
                         count($this->predis->keys($match))
                     );
                 }
