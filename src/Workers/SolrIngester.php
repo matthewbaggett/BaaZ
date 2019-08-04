@@ -26,14 +26,8 @@ class SolrIngester extends GenericWorker
 
     public function run()
     {
-        $solr = $this->getSolr();
         while (true) {
-            if (!$this->doSolrPing()) {
-                echo "Solr Ping Failed\n";
-
-                return;
-            }
-
+            $solr = $this->getSolr();
             $match = 'queue:solr-loader:*';
             $pipeline = $this->predis->pipeline();
 
@@ -47,13 +41,14 @@ class SolrIngester extends GenericWorker
                 $update->addDocument($document);
                 $update->addCommit();
                 $result = $solr->update($update);
-                $this->predis->del($key);
-
-                printf(
-                    'Wrote Product %s to Solr, %d left in queue'.PHP_EOL,
-                    $product->getSlug(),
-                    count($this->predis->keys($match))
-                );
+                if($result->getResponse()->getStatusMessage() == 'OK') {
+                    $this->predis->del($key);
+                    printf(
+                        'Wrote Product %s to Solr, %d left in queue' . PHP_EOL,
+                        $product->getSlug(),
+                        count($this->predis->keys($match))
+                    );
+                }
             }
             $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";
