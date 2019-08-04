@@ -1,0 +1,64 @@
+.starburst {
+    font: 4em/1.4 'Lobster', georgia, serif;
+    background: #202020;
+    width: 2.5em;
+    height: 2.5em;
+    text-align: center;
+    color: #fff;
+}
+
+.starburst,
+.starburst span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.starburst span {
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    transform: rotate(45deg);
+}
+
+.starburst:before,
+.starburst:after ,
+.starburst span:before,
+.starburst span:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    z-index: -1;
+    transform: rotate(30deg);
+}
+
+.starburst:after {
+    transform: rotate(-30deg);
+}
+
+.starburst span:after {
+    transform: rotate(30deg);
+}
+.starburst span:before {
+    transform: rotate(-30deg);
+}
+
+.example {
+    position: absolute;
+    top: 50%;
+    margin-top: -1.25em;
+    margin-left: -1.25em;
+}
+
+#example-1 {
+    left: 25%;
+}
+
+#example-2 {
+    left: 75%;
+    transform: rotate(-45deg);
+}

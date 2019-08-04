@@ -2,16 +2,17 @@
 
 namespace Baaz\Models;
 
-use Solarium\Client as SolrClient;
 use Solarium\Core\Query\DocumentInterface;
 
 class Product extends MultiMediaModel
 {
     protected $brand;
+    protected $category = [];
     protected $categoryPath;
     protected $campaignID;
     protected $channelCategoryId;
     protected $channelCategoryPath;
+    protected $channelCategory = [];
     protected $colours;
     protected $currency;
     protected $deeplink;
@@ -36,6 +37,7 @@ class Product extends MultiMediaModel
     protected $size;
     protected $sku;
     protected $stock;
+    protected $timeImported;
     protected $variantId;
 
     /** @var Image[] */
@@ -51,9 +53,33 @@ class Product extends MultiMediaModel
         return $this;
     }
 
+    public function __toArray()
+    {
+        $images = [];
+
+        foreach ($this->__relatedImages as $image) {
+            $images[] = $image->__toArray();
+        }
+
+        return array_merge(
+            parent::__toArray(),
+            [
+                'TimeImportedAgo' => $this->timeImported ? $this->getTimeAgo()->inWordsFromStrings($this->timeImported) : null,
+                'ReferringDomain' => $this->getReferringDomain(),
+                'Slug' => $this->getSlug(),
+                'Images' => $images,
+            ]
+        );
+    }
+
+    protected function getReferringDomain(){
+        $url = parse_url($this->deeplink);
+        return substr($url['host'],0,4) == 'www.' ? substr($url['host'], 4) : $url['host'];
+    }
+
     public function ingest($json): self
     {
-        return $this->__map(
+        $this->__map(
             $json,
             [
                 'channel_cat_id' => 'channelCategoryId',
@@ -67,6 +93,12 @@ class Product extends MultiMediaModel
                 'family_code' => 'familyCode',
             ]
         );
+
+        $this->timeImported = date('Y-m-d H:i:s');
+        $this->category = explode('>', $this->categoryPath);
+        $this->categoryPath = explode('>', $this->channelCategoryPath);
+
+        return $this;
     }
 
     public function getCacheableImageUrls()
@@ -97,11 +129,11 @@ class Product extends MultiMediaModel
     {
         $return = parent::load($uuid);
 
-        if(is_string($this->pictures)){
+        if (is_string($this->pictures)) {
             $this->pictures = json_decode($this->pictures);
         }
 
-        if(is_array($this->pictures) && count($this->pictures) > 0) {
+        if (is_array($this->pictures) && count($this->pictures) > 0) {
             foreach ($this->pictures as $picture) {
                 $this->__relatedImages[] = Image::Factory()->load($picture);
             }
@@ -110,31 +142,18 @@ class Product extends MultiMediaModel
         return $return;
     }
 
-    public function __toArray()
-    {
-        $images = [];
-        foreach($this->__relatedImages as $image){
-            $images[] = $image->__toArray();
-        }
-        return array_merge(
-            parent::__toArray(),
-            [
-                'Images' => $images,
-            ]
-        );
-    }
-
-    public function createSolrDocument(\Solarium\QueryType\Update\Query\Query $solrQuery) : DocumentInterface
+    public function createSolrDocument(\Solarium\QueryType\Update\Query\Query $solrQuery): DocumentInterface
     {
         $solrDocument = $solrQuery->createDocument();
-        foreach($this->__toArray() as $k => $v){
-            if($v) {
+        foreach ($this->__toArray() as $k => $v) {
+            if ($v) {
                 if (!(is_string($v) || is_numeric($v))) {
                     $v = \GuzzleHttp\json_encode($v);
                 }
-                $solrDocument->$k = $v;
+                $solrDocument->{$k} = $v;
             }
         }
+
         return $solrDocument;
     }
 }

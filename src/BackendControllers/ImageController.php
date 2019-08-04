@@ -57,5 +57,4 @@ class ImageController extends HtmlController
             'Image' => $image->__toArray(),
         ]);
     }
-
 }

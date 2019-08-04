@@ -65,7 +65,6 @@ services:
     depends_on:
       - frontend
       - backend
-      - reddie
 
   frontend:
     build:
@@ -269,30 +268,6 @@ services:
   #    start_period: 10s
   #  networks:
   #    - private
-
-  reddie:
-    image: get-reddie.com/reddie
-    restart: always
-    ports:
-      - "127.0.0.20:8443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - reddie:/reddie/data
-    depends_on:
-      redis-frontend:
-        condition: service_healthy
-      redis-backend:
-        condition: service_healthy
-    networks:
-      - public
-      - private
-    labels:
-      - "traefik.docker.backend=reddie"
-      - "traefik.port=443"
-      - "traefik.protocol=https"
-      - "traefik.frontend.rule=PathPrefix:/"
-      - "traefik.frontend.rule=Host:reddie.baaz.local"
-      - "traefik.docker.network=baaz_public"
 
   solr:
     image: solr

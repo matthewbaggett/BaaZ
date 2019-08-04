@@ -59,16 +59,20 @@ class ProductController extends HtmlController
     /**
      * @route GET / weight=-10
      * @route GET l/random
-     * @param RequestInterface $request
+     *
+     * @param RequestInterface  $request
      * @param ResponseInterface $response
+     *
      * @return ResponseInterface
      */
-    public function homepage(RequestInterface $request, ResponseInterface $response) : ResponseInterface
+    public function homepage(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $productsResponse = $this->apiRequest("GET", "v1/api/products?random&count=20");
+        $productsResponse = $this->apiRequest('GET', 'v1/api/products?random&count=20');
 
-        $this->setTitle("20 Random Products!");
+        $this->setTitle('20 Random Products!');
 
-        return $this->renderHtml($request, $response, "Product/List.twig", (array) $productsResponse);
+        $this->addCss(__DIR__.'/../../assets/starbursts.css');
+
+        return $this->renderHtml($request, $response, 'Product/List.twig', (array) $productsResponse);
     }
 }

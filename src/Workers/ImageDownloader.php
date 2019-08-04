@@ -26,35 +26,35 @@ class ImageDownloader extends GenericWorker
 
     public function run()
     {
-        while(true) {
+        while (true) {
             $match = 'queue:image-worker:*';
             $pipeline = $this->predis->pipeline();
             $tickCount = 0;
             $timeSinceFlush = time();
             foreach (new Keyspace($this->predis, $match) as $key) {
-                $tickCount++;
+                ++$tickCount;
                 $work = $this->predis->hgetall($key);
 
                 try {
                     $imageData = $this->getGuzzle()->get($work['url']);
                     $this->predis->del($key);
                 } catch (\Exception $e) {
-
                 }
 
                 $image = Image::Factory()
                     ->setFileData($imageData->getBody()->getContents())
                     ->setProductUUID($work['product'])
-                    ->save($pipeline);
+                    ->save($pipeline)
+                ;
 
-                $picturesUUIDs = $this->predis->hget("product:{$work['product']}", "pictures");
-                if(($picturesUUIDs = json_decode($picturesUUIDs)) === null){
+                $picturesUUIDs = $this->predis->hget("product:{$work['product']}", 'pictures');
+                if (null === ($picturesUUIDs = json_decode($picturesUUIDs))) {
                     $picturesUUIDs = [];
                 }
 
                 $picturesUUIDs[] = $image->getUuid();
 
-                $pipeline->hset("product:{$work['product']}", "pictures", json_encode($picturesUUIDs));
+                $pipeline->hset("product:{$work['product']}", 'pictures', json_encode($picturesUUIDs));
 
                 if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
                     $pipeline->flushPipeline();
@@ -64,7 +64,7 @@ class ImageDownloader extends GenericWorker
             }
             $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";
-            while (count($this->predis->keys($match)) == 0) {
+            while (0 == count($this->predis->keys($match))) {
                 sleep(5);
             }
         }

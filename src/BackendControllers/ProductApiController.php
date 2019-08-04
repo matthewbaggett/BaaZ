@@ -4,7 +4,6 @@ namespace Baaz\Controllers;
 
 use Baaz\Models\Product;
 use Predis\Client as Predis;
-use Predis\Collection\Iterator\Keyspace;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -62,15 +61,40 @@ class ProductApiController extends Controller
      */
     public function products(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $match = 'product:*';
+        // @todo not sure how to implement random here yet.
+        $random = null !== $request->getQueryParam('random');
+        $count = (int) ($request->getQueryParam('count') ?? 5);
 
-        $productUUIDs = $this->redis->scan(0, ['match' => $match, 'count' => 20]);
+        $productUUIDs = $this->scanUntilEnoughFound('product:*', $count);
 
         $products = [];
+        foreach ($productUUIDs as $productUUID) {
+            $productUUID = str_replace('product:', '', $productUUID);
+            $product = (new Product($this->redis))->load($productUUID);
+            $products[] = $product->__toArray();
+        }
+
+        //\Kint::dump($count, $productUUIDs, $products);exit;
 
         return $response->withJson([
             'Status' => 'Okay',
-            'Products' => $products
+            'Products' => $products,
         ]);
+    }
+
+    private function scanUntilEnoughFound($match, $count)
+    {
+        $found = [];
+        $cursor = 0;
+        $loopedAround = false;
+        while (count($found) < $count && false == $loopedAround) {
+            list($cursor, $keys) = $this->redis->scan($cursor, ['match' => $match, 'count' => $count]);
+            $found = array_unique(array_merge($found, $keys));
+            if (0 == $cursor) {
+                $loopedAround = true;
+            }
+        }
+
+        return array_slice($found, 0, $count);
     }
 }

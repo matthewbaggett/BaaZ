@@ -20,6 +20,18 @@ class Image extends File
         parent::__construct($predis);
     }
 
+    public function __toArray()
+    {
+        $arr = parent::__toArray();
+
+        $arr['StoragePath'] = $this->getStoragePath();
+        $arr['Slug'] = $this->getSlug();
+
+        ksort($arr);
+
+        return $arr;
+    }
+
     /**
      * @return mixed
      */
@@ -47,15 +59,15 @@ class Image extends File
         return Baaz::Container()->get(__CLASS__);
     }
 
-    #public function getStorageKey(): string
-    #{
-    #    return sprintf(
-    #        '%s:product(%s):image_id(%s)',
-    #        $this->getClassStump(),
-    #        $this->getProductUUID() ?? "*",
-    #        $this->uuid,
-    #    );
-    #}
+    //public function getStorageKey(): string
+    //{
+    //    return sprintf(
+    //        '%s:product(%s):image_id(%s)',
+    //        $this->getClassStump(),
+    //        $this->getProductUUID() ?? "*",
+    //        $this->uuid,
+    //    );
+    //}
 
     public function getStoragePath(): string
     {
@@ -80,19 +92,9 @@ class Image extends File
         return sprintf(
             'i/%s/%sx%s.%s',
             $this->uuid,
-            300,300,
+            300,
+            300,
             'jpg'
         );
-    }
-
-    public function __toArray()
-    {
-        $arr = parent::__toArray();
-
-        $arr['StoragePath'] = $this->getStoragePath();
-        $arr['Slug'] = $this->getSlug();
-
-        ksort($arr);
-        return $arr;
     }
 }

@@ -9,7 +9,8 @@ trait ApiTrait
     /** @var GuzzleClient */
     protected $guzzle;
 
-    protected function getGuzzle(){
+    protected function getGuzzle()
+    {
         $this->guzzle = new GuzzleClient([
             'base_uri' => 'http://backend',
             'timeout' => 2.0,
@@ -18,10 +19,11 @@ trait ApiTrait
                 'Accept' => 'application/json',
             ],
         ]);
+
         return $this->guzzle;
     }
 
-    protected function apiRequest(string $method = 'GET', string $url) : array
+    protected function apiRequest(string $method = 'GET', string $url): array
     {
         $start = microtime(true);
         $response = $this->getGuzzle()->request($method, $url);

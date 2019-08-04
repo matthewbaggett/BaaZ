@@ -27,9 +27,10 @@ class SolrIngester extends GenericWorker
     public function run()
     {
         $solr = $this->getSolr();
-        while(true) {
-            if(!$this->doSolrPing()){
+        while (true) {
+            if (!$this->doSolrPing()) {
                 echo "Solr Ping Failed\n";
+
                 return;
             }
 
@@ -56,7 +57,7 @@ class SolrIngester extends GenericWorker
             }
             $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";
-            while (count($this->predis->keys($match)) == 0) {
+            while (0 == count($this->predis->keys($match))) {
                 sleep(5);
             }
         }

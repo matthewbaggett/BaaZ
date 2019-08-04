@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aeb3a9c0ec476f09181c47048c32df5b",
+    "content-hash": "1507eae9ce647c06ac941877e9f0d29d",
     "packages": [
         {
             "name": "benzine/benzine",
@@ -3166,6 +3166,54 @@
                 "laravel"
             ],
             "time": "2019-03-13T13:58:55+00:00"
+        },
+        {
+            "name": "jimmiw/php-time-ago",
+            "version": "3.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jimmiw/php-time-ago.git",
+                "reference": "e61983105e73e78efc3ff2a43faa2cf47f633e86"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jimmiw/php-time-ago/zipball/e61983105e73e78efc3ff2a43faa2cf47f633e86",
+                "reference": "e61983105e73e78efc3ff2a43faa2cf47f633e86",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "phpmd/phpmd": "@stable",
+                "phpunit/phpunit": "^6",
+                "squizlabs/php_codesniffer": "^3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Westsworld": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jimmi Westerberg",
+                    "homepage": "http://www.westsworld.dk",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple module, that displays the date in a \"time ago\" format",
+            "homepage": "https://github.com/jimmiw/php-time-ago",
+            "keywords": [
+                "distance of time",
+                "time ago",
+                "time ago in words"
+            ],
+            "time": "2019-04-08T14:06:41+00:00"
         },
         {
             "name": "johnkary/phpunit-speedtrap",
@@ -9666,7 +9714,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.3"
+        "php": ">=7.3",
+        "ext-json": "*"
     },
     "platform-dev": []
 }

@@ -2,10 +2,92 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+    <style>
+        .star .starburst {
+            font: 2em/1.4 'Lobster', georgia, serif;
+            background: #E95420;
+            width: 3.0em;
+            height: 3.0em;
+            text-align: center;
+            color: white;
+        }
+
+        .star .starburst,
+        .star .starburst span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star .starburst span {
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            transform: rotate(45deg);
+        }
+
+        .star .starburst:before,
+        .star .starburst:after ,
+        .star .starburst span:before,
+        .star .starburst span:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            z-index: -1;
+            transform: rotate(30deg);
+        }
+
+        .star .starburst:before,
+        .star .starburst:after{
+            display:none
+        }
+
+        .star .starburst:after {
+            transform: rotate(-30deg);
+        }
+
+        .star .starburst span:after {
+            transform: rotate(30deg);
+        }
+        .star .starburst span:before {
+            transform: rotate(-30deg);
+        }
+
+        .star .starburst-1 {
+            left: 25%;
+        }
+
+        .star .starburst-2 {
+            left: 75%;
+            transform: rotate(-45deg);
+        }
+
+    </style>
+    <style>
+        h1 {
+            margin-right: 3em;
+        }
+        .star {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    </style>
     <div class="page-header" id="banner">
         <div class="row">
             <div class="col-lg-7 col-md-7 col-sm-6">
                 <h1>{{ Product.Name }}</h1>
+                <div class="star">
+                    <a href="/{{ Product.Slug }}" class="starburst">
+                        <span>
+                            &euro;{{ Product.Price }}
+                        </span>
+                    </a>
+                </div>
                 {{ Product.Description | nl2br }}
             </div>
             <div class="col-lg-5 col-md-5 col-sm-6">
@@ -13,7 +95,9 @@
                         style="width: 100%; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;"
                         src="/{{ Product.Images[0].Slug }}"
                 />
+                <a href="{{ Product.Deeplink }}" class="btn btn-success">Go get it from {{ Product.ReferringDomain }}!</a>
             </div>
+            {{ dump(Product) }}
         </div>
     </div>
 {% endblock %}

@@ -2,10 +2,8 @@
 
 namespace Baaz\Controllers;
 
-use Baaz\Controllers\Traits\ApiTrait;
 use Baaz\Filesystem\ImageFilesystem;
 use Baaz\Models\Image;
-use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;

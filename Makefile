@@ -2,6 +2,7 @@ setup:
 	composer update --ignore-platform-reqs
 
 clean:
+	sudo chown $(USER):$(USER) . -R
 	docker-compose down --remove-orphans
 	chmod +x *.runit bin/*
 	-vendor/bin/php-cs-fixer fix
@@ -14,11 +15,11 @@ push:
 	docker-compose push
 
 up:
-	docker-compose up \
-		frontend \
-		backend \
+	docker-compose up -d \
+		traefik \
 		worker-feed \
-		worker-images
+		worker-images \
+		worker-solr
 
 test:
 	-vendor/bin/php-cs-fixer fix
@@ -30,3 +31,13 @@ worker-feed:
 
 cli:
 	docker-compose run baaz /bin/bash
+
+wipe:
+	docker-compose down -v --remove-orphans;
+	sudo rm -Rfv /media/fantec/docker/baaz/solr/*
+	#sudo rm -Rfv /media/fantec/docker/baaz/persist/*
+	sudo rm -Rfv /media/fantec/docker/baaz/db/*
+	sudo rm -Rfv /media/fantec/docker/baaz/redis-backend/*
+	sudo rm -Rfv /media/fantec/docker/baaz/redis-frontend/*
+
+wipe-and-restart: clean wipe up

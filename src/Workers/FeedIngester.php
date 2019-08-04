@@ -90,9 +90,9 @@ class FeedIngester extends GenericWorker
                             $pipeline->flushPipeline(true);
                             $queuedRecords = 0;
                         }
-                        if($this->slowMode){
+                        if ($this->slowMode) {
                             $sleep = $this->environmentService->get('DELAY_PER_ITEM_MS', 0) * 1000;
-                            printf("Sleeping for %s seconds...\n", number_format($sleep/1000000,3));
+                            printf("Sleeping for %s seconds...\n", number_format($sleep / 1000000, 3));
                             usleep($sleep);
                         }
                     }

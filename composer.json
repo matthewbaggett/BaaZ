@@ -44,7 +44,8 @@
         "matthewbaggett/clamp": "^1.1",
         "league/flysystem": "^1.0",
         "league/flysystem-ziparchive": "^1.0",
-        "solarium/solarium": "^5.0"
+        "solarium/solarium": "^5.0",
+        "jimmiw/php-time-ago": "^3.0"
     },
     "autoload": {
         "psr-4": {

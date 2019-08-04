@@ -22,11 +22,13 @@ trait SolrWorkerTrait
         return $this->solr;
     }
 
-    public function doSolrPing() : bool
+    public function doSolrPing(): bool
     {
         $ping = $this->solr->createPing();
+
         try {
             $this->solr->ping($ping);
+
             return true;
         } catch (SolrException $e) {
             return false;
