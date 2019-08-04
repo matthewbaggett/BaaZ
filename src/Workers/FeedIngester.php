@@ -3,13 +3,7 @@
 namespace Baaz\Workers;
 
 use Baaz\Models\Product;
-use Doctrine\Common\Cache\FilesystemCache;
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\HandlerStack;
-use Kevinrob\GuzzleCache\CacheMiddleware;
-use Kevinrob\GuzzleCache\KeyValueHttpHeader;
-use Kevinrob\GuzzleCache\Storage\DoctrineCacheStorage;
-use Kevinrob\GuzzleCache\Strategy\GreedyCacheStrategy;
+use Baaz\Workers\Traits\GuzzleWorkerTrait;
 use Predis\Client as Predis;
 use QXS\WorkerPool\ClosureWorker;
 use QXS\WorkerPool\Semaphore;
@@ -18,12 +12,14 @@ use ⌬\UUID\UUID;
 
 class FeedIngester extends GenericWorker
 {
+    use GuzzleWorkerTrait;
+
     public const CACHE_PATH = __DIR__.'/../../cache/';
-    /** @var GuzzleClient */
-    protected $guzzle;
 
     /** @var Predis */
     protected $predis;
+
+    protected $slowMode = true;
 
     public function __construct(
         Predis $predis,
@@ -32,28 +28,11 @@ class FeedIngester extends GenericWorker
         parent::__construct($environmentService);
 
         $this->predis = $predis;
-
-        $stack = HandlerStack::create();
-
-        $stack->push(
-            new CacheMiddleware(
-                new GreedyCacheStrategy(
-                    new DoctrineCacheStorage(
-                        new FilesystemCache(self::CACHE_PATH)
-                    ),
-                    86400,
-                    new KeyValueHttpHeader(['Authorization'])
-                )
-            ),
-            'feed-cache'
-        );
-
-        $this->guzzle = new GuzzleClient(['handler' => $stack]);
     }
 
     public function run(): void
     {
-        $feeds = $this->guzzle->get('https://tt_shops:tt_shops!@api.shop2market.com/api/v1/publishers/1885/feeds.json');
+        $feeds = $this->getGuzzle()->get('https://tt_shops:tt_shops!@api.shop2market.com/api/v1/publishers/1885/feeds.json');
 
         $feeds = \GuzzleHttp\json_decode($feeds->getBody()->getContents(), true);
 
@@ -66,7 +45,7 @@ class FeedIngester extends GenericWorker
                 if (strtotime($feed['start_date']) < time() && strtotime($feed['end_date']) > time() && $feed['active']) {
                     $ljsonGzPath = self::CACHE_PATH."{$feed['publisher_id']}_{$feed['shop_id']}.ljson.gz";
                     if (!file_exists($ljsonGzPath) || filemtime($ljsonGzPath) < time() - 86400) {
-                        $channelFeedJsonLinesRequest = $this->guzzle->get($feed['feeds']['json.gz']);
+                        $channelFeedJsonLinesRequest = $this->getGuzzle()->get($feed['feeds']['json.gz']);
                         $channelFeedJsonLinesRequest->getBody()->rewind();
 
                         $channelFeedJsonLinesCompressed = $channelFeedJsonLinesRequest->getBody()->getContents();
@@ -85,21 +64,36 @@ class FeedIngester extends GenericWorker
                             $product->ingest($json);
                             $product->save($pipeline);
 
+                            // Add the product images to a queue for the image-worker
                             foreach ($product->getCacheableImageUrls() as $imageUrl) {
-                                $pipeline->set(
+                                $pipeline->hmset(
                                     sprintf('%s:%s:%s', 'queue', 'image-worker', UUID::v4()),
-                                    $imageUrl
+                                    [
+                                        'url' => $imageUrl,
+                                        'product' => $product->getUuid(),
+                                    ]
                                 );
                             }
 
-                            $pipeline->set('memory:ingester:feed:'.gethostname(), memory_get_usage());
+                            // And add the product to a queue for the solr-loader
+                            $pipeline->set(
+                                sprintf('%s:%s:%s', 'queue', 'solr-loader', UUID::v4()),
+                                $product->getUuid()
+                            );
 
-                            if ($queuedRecords > 200) {
-                                $pipeline->flushPipeline(true);
-                                $queuedRecords = 0;
-                            }
+                            //Set memory usage statistic in redis.
+                            $pipeline->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_usage());
                         } catch (\Exception $e) {
                             echo $e->getMessage()."\n";
+                        }
+                        if ($queuedRecords > 200 || $this->slowMode) {
+                            $pipeline->flushPipeline(true);
+                            $queuedRecords = 0;
+                        }
+                        if($this->slowMode){
+                            $sleep = $this->environmentService->get('DELAY_PER_ITEM_MS', 0) * 1000;
+                            printf("Sleeping for %s seconds...\n", number_format($sleep/1000000,3));
+                            usleep($sleep);
                         }
                     }
                     $pipeline->flushPipeline(true);

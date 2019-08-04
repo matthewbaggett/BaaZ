@@ -2,7 +2,7 @@
 
 namespace Baaz\Models;
 
-use Predis\Pipeline\Pipeline;
+use Predis\Collection\Iterator\Keyspace;
 
 class Product extends MultiMediaModel
 {
@@ -36,7 +36,8 @@ class Product extends MultiMediaModel
     protected $stock;
     protected $variantId;
 
-    protected $__isDirty = false;
+    /** @var Image[] */
+    protected $__relatedImages;
 
     public function __call($name, $arguments)
     {
@@ -107,64 +108,6 @@ class Product extends MultiMediaModel
         );
     }
 
-    public function load($uuid): self
-    {
-        $key = sprintf('%s:%s', 'product', $uuid);
-
-        $hmgetResult = array_combine($this->getValidFields(), $this->getRedis()->hmget($key, $this->getValidFields()));
-
-        foreach ($hmgetResult as $k => $v) {
-            $setter = "set{$k}";
-            $this->{$setter}($v);
-        }
-
-        return $this;
-    }
-
-    public function save(Pipeline $pipeline = null, $savePipeline = true): self
-    {
-        if (!$this->__isDirty) {
-            return $this;
-        }
-
-        if (!$pipeline) {
-            $pipeline = $this->getRedis()->pipeline();
-        }
-
-        $dict = [];
-        foreach ($this->getValidFields() as $field) {
-            if ($this->{$field}) {
-                if (is_object($this->{$field}) || is_array($this->{$field})) {
-                    $this->{$field} = \GuzzleHttp\json_encode($this->{$field});
-                }
-                $dict[$field] = $this->{$field};
-            }
-        }
-
-        $pipeline->hmset(
-            sprintf(
-                '%s:%s',
-                'product',
-                $this->uuid->__toString(),
-            ),
-            $dict
-        );
-
-        if ($savePipeline) {
-            $pipeline->flushPipeline(true);
-        }
-
-        printf(
-            '%s %s to Redis as %d keys ( %s )'.PHP_EOL,
-            $savePipeline ? 'Wrote' : 'Queued',
-            $this->name,
-            count($dict),
-            sprintf('http://baaz.local/%s', $this->getSlug())
-        );
-
-        return $this;
-    }
-
     public function getCacheableImageUrls()
     {
         return [
@@ -176,7 +119,7 @@ class Product extends MultiMediaModel
     {
         return sprintf(
             'p/%s/%s',
-            $this->getUuid(), //substr((string) $this->getUuid(), 0, 7),
+            $this->uuid,
             str_replace(
                 ' ',
                 '-',
@@ -189,16 +132,29 @@ class Product extends MultiMediaModel
         );
     }
 
-    private function getValidFields(): array
+    public function load($uuid): MultiMediaModel
     {
-        $valid = [];
-        foreach (array_keys(get_object_vars($this)) as $field) {
-            if ('__' == substr($field, 0, 2)) {
-                continue;
-            }
-            $valid[] = $field;
+        $return = parent::load($uuid);
+
+        $pictures = $this->getRedis()->lrange("product:{$uuid}:pictures", 0, 5);
+        foreach($pictures as &$picture){
+            $this->__relatedImages[] = Image::Factory()->load($picture);
         }
 
-        return $valid;
+        return $return;
+    }
+
+    public function __toArray()
+    {
+        $images = [];
+        foreach($this->__relatedImages as $image){
+            $images[] = $image->__toArray();
+        }
+        return array_merge(
+            parent::__toArray(),
+            [
+                'Images' => $images,
+            ]
+        );
     }
 }

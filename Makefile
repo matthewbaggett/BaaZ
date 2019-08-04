@@ -2,7 +2,8 @@ setup:
 	composer update --ignore-platform-reqs
 
 clean:
-	docker-compose down -v --remove-orphans
+	docker-compose down --remove-orphans
+	chmod +x *.runit bin/*
 	-vendor/bin/php-cs-fixer fix
 
 build:
@@ -17,7 +18,7 @@ up:
 		frontend \
 		backend \
 		worker-feed \
-		redis-commander
+		worker-images
 
 test:
 	-vendor/bin/php-cs-fixer fix

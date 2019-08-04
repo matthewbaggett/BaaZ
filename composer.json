@@ -40,7 +40,9 @@
         "wyrihaximus/cpu-core-detector": "^1.0",
 
         "psr/cache": "^1.0.0",
-        "matthewbaggett/clamp": "^1.1"
+        "matthewbaggett/clamp": "^1.1",
+        "league/flysystem": "^1.0",
+        "league/flysystem-ziparchive": "^1.0"
     },
     "autoload": {
         "psr-4": {

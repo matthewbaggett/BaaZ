@@ -2,52 +2,60 @@
 
 namespace Baaz\Controllers;
 
-use Baaz\Models\Product;
-use Predis\Client as Predis;
+use Baaz\Models\Image;
+use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Views\Twig;
 use ⌬\Configuration\Configuration;
-use ⌬\Controllers\Abstracts\Controller;
+use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
+use ⌬\Redis\Redis;
 
-class ProductApiController extends Controller
+class ImageController extends HtmlController
 {
     /** @var Configuration */
     private $configuration;
-    /** @var Predis */
+    /** @var Redis */
     private $redis;
     /** @var Logger */
     private $logger;
+    /** @var GuzzleClient */
+    private $guzzle;
 
     public function __construct(
+        Twig $twig,
         Configuration $configuration,
-        Predis $redis,
+        Redis $redis,
         Logger $logger
     ) {
+        parent::__construct($twig);
+
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
     }
 
     /**
-     * @route GET api/product/{productUUID}.json
+     * @route GET image/{imageUUID}.json
      *
      * @param Request  $request
      * @param Response $response
      *
      * @return ResponseInterface
      */
-    public function product(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function image(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $productUUID = $request->getAttribute('productUUID');
+        $imageUUID = $request->getAttribute('imageUUID');
 
-        $product = (new Product($this->redis))->load($productUUID);
+        $image = Image::Factory()->load($imageUUID);
 
         return $response->withJson([
             'Status' => 'Okay',
-            'Product' => $product->__toArray(),
+            'Image' => $image->__toArray(),
         ]);
     }
+
 }

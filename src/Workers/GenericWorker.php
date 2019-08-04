@@ -27,6 +27,8 @@ class GenericWorker
 
         $workerPool->setWorkerPoolSize($threadCount);
 
+        echo "Starting new worker pool (threads={$threadCount})\n";
+
         return $workerPool;
     }
 }

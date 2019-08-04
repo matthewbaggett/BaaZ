@@ -1,10 +1,66 @@
 version: '2.4'
 
+networks:
+  public:
+    name: baaz_public
+  private:
+
 volumes:
   db-persist:
-  cache-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/db
+      o: bind
+  cache-frontend-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/redis-frontend
+      o: bind
+  cache-backend-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/redis-backend
+      o: bind
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/cache
+      o: bind
+  persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/persist
+      o: bind
+  reddie:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/reddie
+      o: bind
+
 
 services:
+  traefik:
+    image: traefik
+    command: -c /dev/null --web --docker --logLevel=INFO
+    ports:
+      - "127.0.0.20:80:80"
+      - "127.0.0.20:1936:8080"
+      - "127.0.0.20:443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - public
+    depends_on:
+      - frontend
+      - backend
+      - reddie
+
   frontend:
     build:
       context: .
@@ -12,9 +68,11 @@ services:
     image: registry.gone.io/baaz/frontend
     restart: always
     ports:
-      - 127.0.0.20:80:80
+      - "127.0.0.20:8080:80"
     volumes:
       - ./:/app
+      - cache:/app/cache
+      - persist:/app/persist
       - ./src/FrontendControllers:/app/src/Controllers:ro
     environment:
       REDIS_HOST: tcp://redis-frontend:6379
@@ -25,8 +83,15 @@ services:
       backend:
         condition: service_healthy
     cpus: 0.50
-    healthcheck:
-      disable: true
+    networks:
+      - public
+      - private
+    labels:
+      - "traefik.docker.backend=frontend"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.frontend.rule=Host:baaz.local"
+      - "traefik.docker.network=baaz_public"
 
   backend:
     build:
@@ -35,9 +100,11 @@ services:
     image: registry.gone.io/baaz/backend
     restart: always
     ports:
-      - 127.0.0.20:81:80
+      - "127.0.0.20:8081:80"
     volumes:
       - ./:/app
+      - cache:/app/cache
+      - persist:/app/persist
       - ./src/BackendControllers:/app/src/Controllers:ro
     environment:
       REDIS_HOST: tcp://redis-backend:6379
@@ -45,6 +112,15 @@ services:
       redis-backend:
         condition: service_healthy
     cpus: 0.50
+    networks:
+      - public
+      - private
+    labels:
+      - "traefik.docker.backend=backend"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.frontend.rule=Host:api.baaz.local"
+      - "traefik.docker.network=baaz_public"
 
   worker-feed:
     build:
@@ -54,13 +130,18 @@ services:
     restart: always
     volumes:
       - ./:/app
+      - cache:/app/cache
+      - persist:/app/persist
+    networks:
+      - private
     depends_on:
       redis-backend:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-    cpus: 0.50
+      DELAY_PER_ITEM_MS: 60000
+    cpus: 0.20
 
   worker-images:
     build:
@@ -70,13 +151,17 @@ services:
     restart: always
     volumes:
       - ./:/app
+      - cache:/app/cache
+      - persist:/app/persist
+    networks:
+      - private
     depends_on:
       redis-backend:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-    cpus: 0.50
+    cpus: 0.20
 
   redis-frontend:
     image: redis:5
@@ -84,6 +169,10 @@ services:
     ports:
       - 127.0.0.20:6378:6379
     command: redis-server --appendonly yes
+    volumes:
+      - cache-frontend-persist:/data
+    networks:
+      - private
     healthcheck:
       test: ["CMD", "redis-cli", "PING"]
       interval: 30s
@@ -99,7 +188,9 @@ services:
       - 127.0.0.20:6379:6379
     command: redis-server --appendonly yes
     volumes:
-      - cache-persist:/data
+      - cache-backend-persist:/data
+    networks:
+      - private
     healthcheck:
       test: ["CMD", "redis-cli", "PING"]
       interval: 30s
@@ -108,34 +199,25 @@ services:
       start_period: 20s
     cpus: 0.70
 
-  redis-monitor-frontend:
-    image: redis:5
-    restart: always
-    command: redis-cli -h redis-frontend MONITOR
-    depends_on:
-      redis-frontend:
-        condition: service_healthy
-
-  redis-monitor-backend:
-    image: redis:5
-    restart: always
-    command: redis-cli -h redis-backend MONITOR
-    depends_on:
-      redis-backend:
-        condition: service_healthy
-
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-      - REDIS_HOSTS=frontend:redis-frontend:6379:0,backend:redis-backend:6379:0
-    ports:
-      - 127.0.0.20:8081:8081
-    depends_on:
-      redis-frontend:
-        condition: service_healthy
-      redis-backend:
-        condition: service_healthy
+#  redis-monitor-frontend:
+#    image: redis:5
+#    restart: always
+#    command: redis-cli -h redis-frontend MONITOR
+#    depends_on:
+#      redis-frontend:
+#        condition: service_healthy
+#    networks:
+#      - private
+#
+#  redis-monitor-backend:
+#    image: redis:5
+#    restart: always
+#    command: redis-cli -h redis-backend MONITOR
+#    depends_on:
+#      redis-backend:
+#        condition: service_healthy
+#    networks:
+#      - private
 
   #mariadb:
   #  image: mariadb:10
@@ -155,3 +237,29 @@ services:
   #    timeout: 10s
   #    retries: 3
   #    start_period: 10s
+  #  networks:
+  #    - private
+
+  reddie:
+    image: get-reddie.com/reddie
+    restart: always
+    ports:
+      - "127.0.0.20:8443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - reddie:/reddie/data
+    depends_on:
+      redis-frontend:
+        condition: service_healthy
+      redis-backend:
+        condition: service_healthy
+    networks:
+      - public
+      - private
+    labels:
+      - "traefik.docker.backend=reddie"
+      - "traefik.port=443"
+      - "traefik.protocol=https"
+      - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.frontend.rule=Host:reddie.baaz.local"
+      - "traefik.docker.network=baaz_public"
