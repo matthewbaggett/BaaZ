@@ -148,7 +148,7 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 10000
+      DELAY_PER_ITEM_MS: 1000
     cpus: 0.20
 
   worker-images:
@@ -168,7 +168,6 @@ services:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
-      THREAD_MULTIPLE: 0.25
     cpus: 0.20
 
   worker-solr:
@@ -189,7 +188,6 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       SOLR_HOST: tcp://solr:8983
-      THREAD_MULTIPLE: 0.25
     cpus: 0.20
 
   redis-frontend:

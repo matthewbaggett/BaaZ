@@ -46,10 +46,10 @@ class Product extends MultiMediaModel
     public function __construct($query = [], $response = null)
     {
         parent::__construct($query, $response);
-        if(!empty($query) && isset($query['Images'])){
-            foreach($query['Images'] as $imageJson){
+        if (!empty($query) && isset($query['Images'])) {
+            foreach ($query['Images'] as $imageJson) {
                 $imageJson = json_decode($imageJson, true);
-                foreach($imageJson as $image) {
+                foreach ($imageJson as $image) {
                     $this->__relatedImages[] = Image::Factory()->load($image['Uuid']);
                 }
             }

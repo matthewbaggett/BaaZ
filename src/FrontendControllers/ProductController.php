@@ -57,6 +57,44 @@ class ProductController extends HtmlController
     }
 
     /**
+     * @route GET /s/{searchTerms}
+     *
+     * @param RequestInterface  $request
+     * @param ResponseInterface $response
+     *
+     * @return ResponseInterface
+     */
+    public function search(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $numProducts = 50;
+
+        $searchTerms = $request->getAttribute('searchTerms');
+
+        $productsResponse = $this->apiRequest('GET', "v1/api/search/{$searchTerms}?perPage={$numProducts}");
+
+        $this->setTitle($searchTerms);
+
+        $this->addCss(__DIR__.'/../../assets/starbursts.css');
+
+        return $this->renderHtml($request, $response, 'Product/List.twig', (array) $productsResponse);
+    }
+
+    /**
+     * @route POST /s
+     *
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return ResponseInterface
+     */
+    public function searchRedirector(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $searchTerm = $request->getParam('searchTerm');
+
+        return $response->withRedirect("/s/{$searchTerm}");
+    }
+
+    /**
      * @route GET / weight=-10
      * @route GET l/random
      *
