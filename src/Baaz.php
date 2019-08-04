@@ -25,7 +25,7 @@ class Baaz extends ⌬
                         'host' => $solrHost['host'],
                         'port' => $solrHost['port'],
                         'path' => '/',
-                        'core' => 'baaz',
+                        'core' => 'mycore',
                     )
                 )
             );

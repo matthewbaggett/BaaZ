@@ -2,7 +2,8 @@
 
 namespace Baaz\Models;
 
-use Predis\Collection\Iterator\Keyspace;
+use Solarium\Client as SolrClient;
+use Solarium\Core\Query\DocumentInterface;
 
 class Product extends MultiMediaModel
 {
@@ -37,48 +38,7 @@ class Product extends MultiMediaModel
     protected $variantId;
 
     /** @var Image[] */
-    protected $__relatedImages;
-
-    public function __call($name, $arguments)
-    {
-        $k = lcfirst(substr($name, 3));
-
-        switch (substr($name, 0, 3)) {
-            case 'get':
-                if (property_exists($this, $k)) {
-                    return $this->{$k};
-                }
-
-                throw new \Exception(sprintf(
-                    '%s does not contain property %s in %s',
-                    __CLASS__,
-                    $k,
-                    '['.implode(', ', array_keys(get_object_vars($this))).']'
-                ));
-
-                break;
-            case 'set':
-                if (property_exists($this, $k)) {
-                    if ($this->{$k} != $arguments[0]) {
-                        $this->{$k} = $arguments[0];
-                        $this->__isDirty = true;
-                    }
-
-                    return $this;
-                }
-
-                throw new \Exception(sprintf(
-                    '%s does not contain property %s in %s',
-                    __CLASS__,
-                    $k,
-                    '['.implode(', ', array_keys(get_object_vars($this))).']'
-                ));
-
-                break;
-            default:
-                throw new \Exception(sprintf('%s does not contain function %s', __CLASS__, $name));
-        }
-    }
+    protected $__relatedImages = [];
 
     protected function __map(array $inputData, array $mapping): self
     {
@@ -156,5 +116,19 @@ class Product extends MultiMediaModel
                 'Images' => $images,
             ]
         );
+    }
+
+    public function createSolrDocument(\Solarium\QueryType\Update\Query\Query $solrQuery) : DocumentInterface
+    {
+        $solrDocument = $solrQuery->createDocument();
+        foreach($this->__toArray() as $k => $v){
+            if($v) {
+                if (!(is_string($v) || is_numeric($v))) {
+                    $v = \GuzzleHttp\json_encode($v);
+                }
+                $solrDocument->$k = $v;
+            }
+        }
+        return $solrDocument;
     }
 }

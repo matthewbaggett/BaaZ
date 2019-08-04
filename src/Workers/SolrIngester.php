@@ -36,13 +36,24 @@ class SolrIngester extends GenericWorker
 
             $match = 'queue:solr-loader:*';
             $pipeline = $this->predis->pipeline();
+
             foreach (new Keyspace($this->predis, $match) as $key) {
                 $productUUID = $this->predis->get($key);
+                /** @var Product $product */
                 $product = (new Product($this->predis))->load($productUUID);
-                \Kint::dump($product);
-                \Kint::dump($solr);
-                sleep(60);
+                $update = $solr->createUpdate();
 
+                $document = $product->createSolrDocument($update);
+                $update->addDocument($document);
+                $update->addCommit();
+                $result = $solr->update($update);
+                $this->predis->del($key);
+
+                printf(
+                    'Wrote Product %s to Solr, %d left in queue'.PHP_EOL,
+                    $product->getSlug(),
+                    count($this->predis->keys($match))
+                );
             }
             $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";

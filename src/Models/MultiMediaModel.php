@@ -46,19 +46,53 @@ class MultiMediaModel
         return $this;
     }
 
+    public function __call($name, $arguments)
+    {
+        $k = lcfirst(substr($name, 3));
+
+        switch (substr($name, 0, 3)) {
+            case 'get':
+                if (property_exists($this, $k)) {
+                    return $this->{$k};
+                }
+
+                throw new \Exception(sprintf(
+                    '%s does not contain property %s in %s',
+                    __CLASS__,
+                    $k,
+                    '[' . implode(', ', array_keys(get_object_vars($this))) . ']'
+                ));
+
+                break;
+            case 'set':
+                if (property_exists($this, $k)) {
+                    if ($this->{$k} != $arguments[0]) {
+                        $this->{$k} = $arguments[0];
+                        $this->__isDirty = true;
+                    }
+
+                    return $this;
+                }
+
+                throw new \Exception(sprintf(
+                    '%s does not contain property %s in %s',
+                    __CLASS__,
+                    $k,
+                    '[' . implode(', ', array_keys(get_object_vars($this))) . ']'
+                ));
+
+                break;
+            default:
+                throw new \Exception(sprintf('%s does not contain function %s', __CLASS__, $name));
+        }
+    }
+
     public function __toArray()
     {
         $array = [];
-        foreach (get_object_vars($this) as $k => $v) {
-            if ('__' != substr($k, 0, 2)) {
-                $k = ucfirst($k);
-                if (in_array(substr($v, 0, 1), ['{', '['], true)) {
-                    $v = \GuzzleHttp\json_decode($v);
-                }
-                $array[$k] = $v;
-            }
+        foreach ($this->getValidFields() as $field){
+            $array[$field] = $this->{$field};
         }
-
         return $array;
     }
 

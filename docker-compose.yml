@@ -307,3 +307,4 @@ services:
       - docker-entrypoint.sh
       - solr-precreate
       - mycore
+    cpus: 0.70
