@@ -47,6 +47,9 @@ wipe:
 
 wipe-and-restart: clean wipe up
 
+tilix:
+	tilix --maximize --session tilix.json
+
 ngrok:
 	ngrok \
 		start \
@@ -55,3 +58,6 @@ ngrok:
 				frontend \
 				backend \
 				ngrok
+
+docker-purge-running:
+	docker rm $(docker stop $(docker ps -aq))
