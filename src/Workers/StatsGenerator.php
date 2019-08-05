@@ -43,6 +43,10 @@ class StatsGenerator extends GenericWorker
                 $totals[$countName]
             );
         }
+        //Set memory usage statistic in redis.
+        $this->predis->rpush(sprintf("memory:stats:stats:%s", gethostname()), [memory_get_peak_usage()]);
+        $this->predis->ltrim(sprintf("memory:stats:stats:%s", gethostname()),0,99);
+
         $pipeline->flushPipeline();
         echo "Stats generated, sleeping...\n";
         sleep(5*60);
