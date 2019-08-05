@@ -188,7 +188,7 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       SOLR_HOST: tcp://solr:8983
-    cpus: 0.20
+    cpus: 0.40
 
   worker-stats:
     build:

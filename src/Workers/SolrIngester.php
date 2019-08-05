@@ -27,10 +27,9 @@ class SolrIngester extends GenericWorker
     public function run()
     {
         while (true) {
-            $solr = $this->getSolr();
             $match = 'queue:solr-loader:*';
-
             foreach (new Keyspace($this->predis, $match) as $key) {
+                $solr = $this->getSolr();
                 $timeStart = microtime(true);
                 $productUUID = $this->predis->get($key);
                 /** @var Product $product */

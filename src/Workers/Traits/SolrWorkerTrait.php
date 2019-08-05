@@ -15,8 +15,6 @@ trait SolrWorkerTrait
     {
         if (!$this->solr) {
             $this->solr = Baaz::Container()->get(SolrClient::class);
-
-            $this->doSolrPing();
         }
 
         return $this->solr;
