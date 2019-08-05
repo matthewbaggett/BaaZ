@@ -63,8 +63,6 @@ class ImageDownloader extends GenericWorker
                     $work['product']
                 );
 
-
-
                 if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
                     $pipeline->flushPipeline();
                     $tickCount = 0;
@@ -72,8 +70,8 @@ class ImageDownloader extends GenericWorker
                 }
             }
             //Set memory usage statistic in redis.
-            $pipeline->rpush(sprintf("memory:ingester:images:%s", gethostname()), [memory_get_peak_usage()]);
-            $pipeline->ltrim(sprintf("memory:ingester:images:%s", gethostname()),0,99);
+            $pipeline->rpush(sprintf('memory:ingester:images:%s', gethostname()), [memory_get_peak_usage()]);
+            $pipeline->ltrim(sprintf('memory:ingester:images:%s', gethostname()), 0, 99);
             // Flush the pipeline
             $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";

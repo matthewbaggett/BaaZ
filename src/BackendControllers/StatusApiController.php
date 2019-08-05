@@ -2,7 +2,6 @@
 
 namespace Baaz\Controllers;
 
-use Baaz\Models\Product;
 use Predis\Client as Predis;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -47,21 +46,22 @@ class StatusApiController extends Controller
      */
     public function status(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $memoryKeys = $this->redis->keys("memory:*");
+        $memoryKeys = $this->redis->keys('memory:*');
         $memoryUsage = [];
-        foreach($memoryKeys as $memoryKey){
-            list($memory, $set, $task, $node) = explode(":", $memoryKey);
-            $bytes = $this->redis->lrange($memoryKey,0,99);
+        foreach ($memoryKeys as $memoryKey) {
+            list($memory, $set, $task, $node) = explode(':', $memoryKey);
+            $bytes = $this->redis->lrange($memoryKey, 0, 99);
             $bytes = ceil(array_sum($bytes) / count($bytes));
             $megabytes = $bytes / 1024 / 1024;
-            $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = number_format($megabytes,2) . "MB";
+            $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = number_format($megabytes, 2).'MB';
         }
+
         return $response->withJson([
             'Status' => 'Okay',
-            'Products' => $this->redis->get("count:products"),
+            'Products' => $this->redis->get('count:products'),
             'Queues' => [
-                'Solr' => $this->redis->get("count:worker-queue-solr"),
-                'Image' => $this->redis->get("count:worker-queue-image"),
+                'Solr' => $this->redis->get('count:worker-queue-solr'),
+                'Image' => $this->redis->get('count:worker-queue-image'),
             ],
             'Memory' => $memoryUsage,
         ]);

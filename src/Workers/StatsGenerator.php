@@ -46,13 +46,13 @@ class StatsGenerator extends GenericWorker
             $pipeline->flushPipeline();
         }
         //Set memory usage statistic in redis.
-        $pipeline->rpush(sprintf("memory:stats:stats:%s", gethostname()), [memory_get_peak_usage()]);
-        $pipeline->ltrim(sprintf("memory:stats:stats:%s", gethostname()),0,99);
+        $pipeline->rpush(sprintf('memory:stats:stats:%s', gethostname()), [memory_get_peak_usage()]);
+        $pipeline->ltrim(sprintf('memory:stats:stats:%s', gethostname()), 0, 99);
 
         printf(
             "Used %s MB of RAM\nStats generated, sleeping...\n",
-            number_format(memory_get_peak_usage()/1024/1024,2)
+            number_format(memory_get_peak_usage() / 1024 / 1024, 2)
         );
-        sleep(5*60);
+        sleep(5 * 60);
     }
 }

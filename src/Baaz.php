@@ -39,6 +39,5 @@ class Baaz extends ⌬
     {
         parent::setupMiddlewares();
         $this->app->add($this->container->get(MemoryLoggerMiddleware::class));
-
     }
 }
