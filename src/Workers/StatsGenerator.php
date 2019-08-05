@@ -46,7 +46,7 @@ class StatsGenerator extends GenericWorker
             }
             $pipeline->flushPipeline();
             echo "Stats generated, sleeping...\n";
-            sleep(30);
+            sleep(5*60);
         }
     }
 }
