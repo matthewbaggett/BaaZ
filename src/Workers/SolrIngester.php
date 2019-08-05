@@ -29,9 +29,9 @@ class SolrIngester extends GenericWorker
         while (true) {
             $solr = $this->getSolr();
             $match = 'queue:solr-loader:*';
-            $pipeline = $this->predis->pipeline();
 
             foreach (new Keyspace($this->predis, $match) as $key) {
+                $timeStart = microtime(true);
                 $productUUID = $this->predis->get($key);
                 /** @var Product $product */
                 $product = (new Product())->load($productUUID);
@@ -44,13 +44,13 @@ class SolrIngester extends GenericWorker
                 if ('OK' == $result->getResponse()->getStatusMessage()) {
                     $this->predis->del($key);
                     printf(
-                        'Wrote Product %s to Solr, %d left in queue'.PHP_EOL,
+                        'Wrote Product %s to Solr in %s ms, %d left in queue'.PHP_EOL,
                         'http://baaz.local/'.$product->getSlug(),
+                        number_format((microtime(true) - $timeStart) * 1000,0),
                         count($this->predis->keys($match))
                     );
                 }
             }
-            $pipeline->flushPipeline();
             echo "No work to be done, sleeping...\n";
             while (0 == count($this->predis->keys($match))) {
                 sleep(5);
