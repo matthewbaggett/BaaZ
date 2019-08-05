@@ -45,7 +45,7 @@ up:
 
 down:
 	$(COMPOSE_STATEMENT) \
-		 down -v --remove-orphans;
+		 down --remove-orphans;
 
 test:
 	-vendor/bin/php-cs-fixer fix
