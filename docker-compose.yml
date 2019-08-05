@@ -190,6 +190,23 @@ services:
       SOLR_HOST: tcp://solr:8983
     cpus: 0.20
 
+  worker-stats:
+    build:
+      context: .
+      target: worker-stats
+    image: baaz/worker-stats
+    restart: always
+    volumes:
+      - ./:/app
+    networks:
+      - private
+    depends_on:
+      redis-backend:
+        condition: service_healthy
+    environment:
+      REDIS_HOST: tcp://redis-backend:6379
+    cpus: 0.20
+
   redis-frontend:
     image: redis:5
     restart: always

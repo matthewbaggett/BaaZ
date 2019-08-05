@@ -17,6 +17,11 @@ COPY solr-ingester.runit /etc/service/solr-ingester/run
 HEALTHCHECK --interval=30s --timeout=3s \
     CMD ps aux | grep -v grep | grep solr-ingester
 
+FROM worker AS worker-stats
+COPY stats-generator.runit /etc/service/stats-generator/run
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD ps aux | grep -v grep | grep stats-generator
+
 FROM gone/php:nginx AS web
 # Use the public dir from benzine-html
 RUN sed -i 's|/app/public|/app/vendor/benzine/benzine-html/public|g' /etc/nginx/sites-enabled/default

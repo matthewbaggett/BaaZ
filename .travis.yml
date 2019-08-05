@@ -9,6 +9,7 @@ env:
   - CONTAINER=worker-feed
   - CONTAINER=worker-images
   - CONTAINER=worker-solr
+  - CONTAINER=worker-stats
 
 cache:
   directories:
