@@ -20,7 +20,7 @@ before_install:
   - composer global require -q hirak/prestissimo
 
 before_script:
-  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+  - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
   - composer install
 
 script:

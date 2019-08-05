@@ -70,7 +70,7 @@ services:
     build:
       context: .
       target: frontend
-    image: registry.gone.io/baaz/frontend
+    image: baaz/frontend
     restart: always
     ports:
       - "127.0.0.20:8080:80"
@@ -102,7 +102,7 @@ services:
     build:
       context: .
       target: backend
-    image: registry.gone.io/baaz/backend
+    image: baaz/backend
     restart: always
     ports:
       - "127.0.0.20:8081:80"
@@ -134,7 +134,7 @@ services:
     build:
       context: .
       target: worker-feed
-    image: registry.gone.io/baaz/worker-feed
+    image: baaz/worker-feed
     restart: always
     volumes:
       - ./:/app
@@ -155,7 +155,7 @@ services:
     build:
       context: .
       target: worker-images
-    image: registry.gone.io/baaz/worker-images
+    image: baaz/worker-images
     restart: always
     volumes:
       - ./:/app
@@ -174,7 +174,7 @@ services:
     build:
       context: .
       target: worker-solr
-    image: registry.gone.io/baaz/worker-solr
+    image: baaz/worker-solr
     restart: always
     volumes:
       - ./:/app
