@@ -38,7 +38,11 @@ class StatsGenerator extends GenericWorker
                 }
                 $totals[$countName] = count(array_unique($totals[$countName]));
                 $pipeline->set('count:'.$countName, $totals[$countName]);
-                printf("Stats: \"count:%s\" has %d items\n", $countName, $totals[$countName]);
+                printf(
+                    "Stats: \"count:%s\" has %d items\n",
+                    $countName,
+                    $totals[$countName]
+                );
             }
             $pipeline->flushPipeline();
             echo "Stats generated, sleeping...\n";

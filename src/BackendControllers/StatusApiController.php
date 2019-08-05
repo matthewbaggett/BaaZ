@@ -47,13 +47,13 @@ class StatusApiController extends Controller
      */
     public function status(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $productUUID = $request->getAttribute('productUUID');
-
-        $product = (new Product())->load($productUUID);
-
         return $response->withJson([
             'Status' => 'Okay',
-            'Products' => $product->__toArray(),
+            'Products' => $this->redis->get("count:products"),
+            'Queues' => [
+                'Solr' => $this->redis->get("count-worker-queue-solr"),
+                'Image' => $this->redis->get("count-worker-queue-image"),
+            ],
         ]);
     }
 }
