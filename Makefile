@@ -1,3 +1,10 @@
+FILE1 = docker-compose.`hostname`.yml
+ifeq ($(shell test -e $(FILE1) && echo -n yes),yes)
+    COMPOSE_STATEMENT = docker-compose -f docker-compose.yml -f docker-compose.`hostname`.yml
+else
+    COMPOSE_STATEMENT = docker-compose
+endif
+
 setup:
 	composer update --ignore-platform-reqs
 
@@ -8,23 +15,28 @@ clean-code:
 clean-perms:
 	sudo chown $(USER):$(USER) . -R
 clean-docker:
-	docker-compose down --remove-orphans
+	$(COMPOSE_STATEMENT) \
+		down --remove-orphans
 
 clean: clean-perms clean-docker clean-code
 
 build:
 	composer install --ignore-platform-reqs
-	docker-compose build --pull
+	$(COMPOSE_STATEMENT) \
+		 build --pull
 
 push:
-	docker-compose push
+	$(COMPOSE_STATEMENT) \
+		 push
 
 up:
-	docker-compose up -d \
-		traefik \
-		worker-feed \
-		worker-images \
-		worker-solr
+	$(COMPOSE_STATEMENT) \
+		up -d \
+			traefik \
+			worker-feed \
+			worker-images \
+			worker-solr \
+			worker-stats
 
 test:
 	-vendor/bin/php-cs-fixer fix
@@ -32,13 +44,20 @@ test:
 	vendor/bin/phpunit
 
 worker-feed:
-	docker-compose run baaz bin/feed-ingester
+	$(COMPOSE_STATEMENT) \
+		run baaz bin/feed-ingester
 
-cli:
-	docker-compose run baaz /bin/bash
+cli-frontend:
+	$(COMPOSE_STATEMENT) \
+		run frontend /bin/bash
+
+cli-backend:
+	$(COMPOSE_STATEMENT) \
+		run backend /bin/bash
 
 wipe:
-	docker-compose down -v --remove-orphans;
+	$(COMPOSE_STATEMENT) \
+		 down -v --remove-orphans;
 	sudo rm -Rfv /media/fantec/docker/baaz/solr/*
 	#sudo rm -Rfv /media/fantec/docker/baaz/persist/*
 	sudo rm -Rfv /media/fantec/docker/baaz/db/*
