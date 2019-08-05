@@ -1,0 +1,83 @@
+version: '2.4'
+
+services:
+  frontend:
+    volumes:
+      - cache:/app/cache
+      - persist:/app/persist
+    cpus: 0.50
+    scale: 2
+
+  backend:
+    volumes:
+      - cache:/app/cache
+      - persist:/app/persist
+    cpus: 0.50
+    scale: 2
+
+  worker-feed:
+    volumes:
+      - cache:/app/cache
+      - persist:/app/persist
+    environment:
+      THREAD_MULTIPLE: 0.25
+      DELAY_PER_ITEM_MS: 1000
+    cpus: 0.20
+
+  worker-images:
+    cpus: 0.20
+
+  worker-solr:
+    cpus: 0.40
+
+  worker-stats:
+    cpus: 0.20
+
+  redis-backend:
+    volumes:
+      - cache-backend-persist:/data
+    cpus: 0.70
+
+  solr:
+    volumes:
+      - solr-persist:/opt/solr/server/solr/mycores
+    cpus: 0.70
+
+
+volumes:
+  cache-frontend-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/redis-frontend
+      o: bind
+  cache-backend-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/redis-backend
+      o: bind
+  solr-persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/solr
+      o: bind
+  cache:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/cache
+      o: bind
+  persist:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/persist
+      o: bind
+  reddie:
+    driver: local
+    driver_opts:
+      type: none
+      device: /media/fantec/docker/baaz/reddie
+      o: bind

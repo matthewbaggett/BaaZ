@@ -6,49 +6,8 @@ networks:
   private:
 
 volumes:
-  db-persist:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/db
-      o: bind
-  cache-frontend-persist:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/redis-frontend
-      o: bind
-  cache-backend-persist:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/redis-backend
-      o: bind
-  solr-persist:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/solr
-      o: bind
   cache:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/cache
-      o: bind
   persist:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/persist
-      o: bind
-  reddie:
-    driver: local
-    driver_opts:
-      type: none
-      device: /media/fantec/docker/baaz/reddie
-      o: bind
-
 
 services:
   traefik:
@@ -78,6 +37,7 @@ services:
       - persist:/app/persist
       - ./src/FrontendControllers:/app/src/Controllers:ro
     environment:
+      SERVICE_NAME: frontend
       REDIS_HOST: tcp://redis-backend:6379
       BAAZ_BACKEND: http://backend/
     depends_on:
@@ -85,8 +45,6 @@ services:
         condition: service_healthy
       backend:
         condition: service_healthy
-    cpus: 0.50
-    scale: 2
     networks:
       - public
       - private
@@ -96,6 +54,7 @@ services:
       - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.frontend.rule=Host:baaz.local"
       - "traefik.docker.network=baaz_public"
+    scale: 2
 
   backend:
     build:
@@ -109,6 +68,7 @@ services:
       - persist:/app/persist
       - ./src/BackendControllers:/app/src/Controllers:ro
     environment:
+      SERVICE_NAME: backend
       REDIS_HOST: tcp://redis-backend:6379
       SOLR_HOST: tcp://solr:8983
     depends_on:
@@ -116,8 +76,6 @@ services:
         condition: service_healthy
       solr:
         condition: service_started
-    cpus: 0.50
-    scale: 2
     networks:
       - public
       - private
@@ -127,6 +85,7 @@ services:
       - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.frontend.rule=Host:api.baaz.local"
       - "traefik.docker.network=baaz_public"
+    scale: 2
 
   worker-feed:
     build:
@@ -136,8 +95,6 @@ services:
     restart: always
     volumes:
       - ./:/app
-      - cache:/app/cache
-      - persist:/app/persist
     networks:
       - private
     depends_on:
@@ -146,8 +103,7 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 1000
-    cpus: 0.20
+      DELAY_PER_ITEM_MS: 60000
 
   worker-images:
     build:
@@ -157,8 +113,6 @@ services:
     restart: always
     volumes:
       - ./:/app
-      - cache:/app/cache
-      - persist:/app/persist
     networks:
       - private
     depends_on:
@@ -166,7 +120,6 @@ services:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
-    cpus: 0.20
 
   worker-solr:
     build:
@@ -186,7 +139,6 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       SOLR_HOST: tcp://solr:8983
-    cpus: 0.40
 
   worker-stats:
     build:
@@ -203,25 +155,6 @@ services:
         condition: service_healthy
     environment:
       REDIS_HOST: tcp://redis-backend:6379
-    cpus: 0.20
-
-  #redis-frontend:
-  #  image: redis:5
-  #  restart: always
-  #  ports:
-  #    - 127.0.0.20:6378:6379
-  #  command: redis-server --appendonly yes
-  #  volumes:
-  #    - cache-frontend-persist:/data
-  #  networks:
-  #    - private
-  #  healthcheck:
-  #    test: ["CMD", "redis-cli", "PING"]
-  #    interval: 30s
-  #    timeout: 10s
-  #    retries: 3
-  #    start_period: 20s
-  #  cpus: 0.70
 
   redis-backend:
     image: redis:5
@@ -229,8 +162,6 @@ services:
     ports:
       - 127.0.0.20:6379:6379
     command: redis-server --appendonly yes
-    volumes:
-      - cache-backend-persist:/data
     networks:
       - private
     healthcheck:
@@ -239,48 +170,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-    cpus: 0.70
-
-#  redis-monitor-frontend:
-#    image: redis:5
-#    restart: always
-#    command: redis-cli -h redis-frontend MONITOR
-#    depends_on:
-#      redis-frontend:
-#        condition: service_healthy
-#    networks:
-#      - private
-#
-#  redis-monitor-backend:
-#    image: redis:5
-#    restart: always
-#    command: redis-cli -h redis-backend MONITOR
-#    depends_on:
-#      redis-backend:
-#        condition: service_healthy
-#    networks:
-#      - private
-
-  #mariadb:
-  #  image: mariadb:10
-  #  restart: always
-  #  volumes:
-  #    - db-persist:/var/lib/mysql
-  #  ports:
-  #    - 127.0.0.20:3306:3306
-  #  environment:
-  #    - MYSQL_DATABASE=rolodex
-  #    - MYSQL_USER=rolodex
-  #    - MYSQL_PASSWORD=VTL7pRnvpfZKH2zQ
-  #    - MYSQL_ROOT_PASSWORD=tFDuKn4B47DrKJm5
-  #  healthcheck:
-  #    test: ["CMD", "mysqladmin", "-urolodex", "-pVTL7pRnvpfZKH2zQ", "ping"]
-  #    interval: 5s
-  #    timeout: 10s
-  #    retries: 3
-  #    start_period: 10s
-  #  networks:
-  #    - private
 
   solr:
     image: solr
@@ -289,10 +178,7 @@ services:
       - "127.0.0.20:8983:8983"
     networks:
       - private
-    volumes:
-      - solr-persist:/opt/solr/server/solr/mycores
     entrypoint:
       - docker-entrypoint.sh
       - solr-precreate
       - mycore
-    cpus: 0.70
