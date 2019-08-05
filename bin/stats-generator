@@ -2,7 +2,7 @@
 <?php
 
 require_once(__DIR__ . "/../vendor/autoload.php");
-ini_set('memory_limit', '64M');
+ini_set('memory_limit', '128M');
 use Baaz\Workers;
 use ⌬\⌬;
 
