@@ -47,6 +47,12 @@ class StatusApiController extends Controller
      */
     public function status(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $memoryKeys = $this->redis->keys("memory:*");
+        $memoryUsage = [];
+        foreach($memoryKeys as $memoryKey){
+            list($memory, $set, $task, $node) = explode(":", $memoryKey);
+            $memoryUsage[$set][$task][$node] = $this->redis->get($memoryKey);
+        }
         return $response->withJson([
             'Status' => 'Okay',
             'Products' => $this->redis->get("count:products"),
@@ -54,6 +60,7 @@ class StatusApiController extends Controller
                 'Solr' => $this->redis->get("count:worker-queue-solr"),
                 'Image' => $this->redis->get("count:worker-queue-image"),
             ],
+            'Memory' => $memoryUsage,
         ]);
     }
 }
