@@ -13,7 +13,7 @@ trait ApiTrait
     {
         $this->guzzle = new GuzzleClient([
             'base_uri' => 'http://backend',
-            'timeout' => 2.0,
+            'timeout' => 5.0,
             'decode_content' => 'gzip',
             'headers' => [
                 'Accept' => 'application/json',
