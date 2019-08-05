@@ -51,7 +51,8 @@ class StatusApiController extends Controller
         $memoryUsage = [];
         foreach($memoryKeys as $memoryKey){
             list($memory, $set, $task, $node) = explode(":", $memoryKey);
-            $bytes = (int)$this->redis->get($memoryKey);
+            $bytes = $this->redis->lrange($memoryKey,0,99);
+            $bytes = ceil(array_sum($bytes) / count($bytes));
             $megabytes = $bytes / 1024 / 1024;
             $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = number_format($megabytes,2) . "MB";
         }

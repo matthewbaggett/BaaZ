@@ -76,7 +76,8 @@ class FeedIngester extends GenericWorker
                             }
 
                             //Set memory usage statistic in redis.
-                            $pipeline->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_peak_usage());
+                            $this->predis->rpush(sprintf("memory:ingester:feed:%s", gethostname()), [memory_get_peak_usage()]);
+                            $this->predis->ltrim(sprintf("memory:ingester:feed:%s", gethostname()),0,99);
                         } catch (\Exception $e) {
                             echo $e->getMessage()."\n";
                         }
