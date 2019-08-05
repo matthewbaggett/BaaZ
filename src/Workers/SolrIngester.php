@@ -6,6 +6,8 @@ use Baaz\Models\Product;
 use Baaz\Workers\Traits\SolrWorkerTrait;
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
+use Solarium\Exception\ExceptionInterface;
+use Solarium\Exception\HttpException;
 use ⌬\Services\EnvironmentService;
 
 class SolrIngester extends GenericWorker
@@ -39,20 +41,29 @@ class SolrIngester extends GenericWorker
                 $document = $product->createSolrDocument($update);
                 $update->addDocument($document);
                 $update->addCommit();
-                $result = $solr->update($update);
-                if ('OK' == $result->getResponse()->getStatusMessage()) {
-                    $this->predis->del($key);
+                try {
+                    $result = $solr->update($update);
+                    if ('OK' == $result->getResponse()->getStatusMessage()) {
+                        $this->predis->del($key);
+                        printf(
+                            'Wrote Product %s to Solr in %s ms, %d left in queue' . PHP_EOL,
+                            'http://baaz.local/' . $product->getSlug(),
+                            number_format((microtime(true) - $timeStart) * 1000, 0),
+                            count($this->predis->keys($match))
+                        );
+                    } else {
+                        printf(
+                            'Attempt to write product %s to Solr FAILED in %s ms' . PHP_EOL,
+                            'http://baaz.local/' . $product->getSlug(),
+                            number_format((microtime(true) - $timeStart) * 1000, 0)
+                        );
+                    }
+                }catch(ExceptionInterface $exception){
                     printf(
-                        'Wrote Product %s to Solr in %s ms, %d left in queue'.PHP_EOL,
-                        'http://baaz.local/'.$product->getSlug(),
-                        number_format((microtime(true) - $timeStart) * 1000,0),
-                        count($this->predis->keys($match))
-                    );
-                }else{
-                    printf(
-                        'Attempt to write product %s to Solr FAILED in %s ms'.PHP_EOL,
-                        'http://baaz.local/'.$product->getSlug(),
-                        number_format((microtime(true) - $timeStart) * 1000,0)
+                        'Attempt to write product %s to Solr EXCEPTION in %s ms: %s' . PHP_EOL,
+                        'http://baaz.local/' . $product->getSlug(),
+                        number_format((microtime(true) - $timeStart) * 1000, 0),
+                        $exception->getMessage()
                     );
                 }
 
