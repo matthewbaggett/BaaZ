@@ -49,6 +49,12 @@ class SolrIngester extends GenericWorker
                         number_format((microtime(true) - $timeStart) * 1000,0),
                         count($this->predis->keys($match))
                     );
+                }else{
+                    printf(
+                        'Attempt to write product %s to Solr FAILED in %s ms'.PHP_EOL,
+                        'http://baaz.local/'.$product->getSlug(),
+                        number_format((microtime(true) - $timeStart) * 1000,0)
+                    );
                 }
             }
             echo "No work to be done, sleeping...\n";
