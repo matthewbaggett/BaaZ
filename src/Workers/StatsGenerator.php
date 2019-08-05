@@ -25,7 +25,7 @@ class StatsGenerator extends GenericWorker
     public function run()
     {
         $counts = [
-            'products' => 'products:*',
+            'products' => 'product:*',
             'worker-queue-solr' => 'queue:solr-loader:*',
             'worker-queue-image' => 'queue:image-worker:*',
         ];
@@ -33,6 +33,7 @@ class StatsGenerator extends GenericWorker
             $totals = [];
             $pipeline = $this->predis->pipeline();
             foreach($counts as $countName => $match) {
+                $totals[$countName] = [];
                 foreach (new Keyspace($this->predis, $match) as $key) {
                     $totals[$countName][] = $key;
                     $pipeline->sadd('set:' . $countName, $key);
@@ -42,7 +43,7 @@ class StatsGenerator extends GenericWorker
             }
             $pipeline->flushPipeline();
             echo "Stats generated, sleeping...\n";
-            sleep(60);
+            sleep(30);
         }
     }
 }
