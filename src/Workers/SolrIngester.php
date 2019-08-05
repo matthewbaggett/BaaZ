@@ -57,7 +57,7 @@ class SolrIngester extends GenericWorker
                 }
 
                 //Set memory usage statistic in redis.
-                $this->predis->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_peak_usage());
+                $this->predis->setex('memory:ingester:solr:'.gethostname(), 60, memory_get_peak_usage());
             }
             echo "No work to be done, sleeping...\n";
             while (0 == count($this->predis->keys($match))) {
