@@ -46,3 +46,12 @@ wipe:
 	sudo rm -Rfv /media/fantec/docker/baaz/redis-frontend/*
 
 wipe-and-restart: clean wipe up
+
+ngrok:
+	ngrok \
+		start \
+			-config ~/.ngrok2/ngrok.yml \
+			-config .ngrok.yml \
+				frontend \
+				backend \
+				ngrok

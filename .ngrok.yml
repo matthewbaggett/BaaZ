@@ -1,0 +1,16 @@
+region: eu
+tunnels:
+  frontend:
+    proto: http
+    addr: 127.0.0.20:8080
+    hostname: baaz.eu.ngrok.io
+  backend:
+    proto: http
+    addr: 127.0.0.20:8081
+    hostname: api.baaz.eu.ngrok.io
+  ngrok:
+    addr: 4040
+    proto: http
+    auth: "admin:CaptainMorgan"
+    inspect: false
+    hostname: ngrok.baaz.eu.ngrok.io
