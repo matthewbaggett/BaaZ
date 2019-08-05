@@ -52,8 +52,8 @@ class StatusApiController extends Controller
         foreach($memoryKeys as $memoryKey){
             list($memory, $set, $task, $node) = explode(":", $memoryKey);
             $bytes = (int)$this->redis->get($memoryKey);
-            $megabytes = $bytes / 1024;
-            $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = $megabytes;
+            $megabytes = $bytes / 1024 / 1024;
+            $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = number_format($megabytes,2) . "MB";
         }
         return $response->withJson([
             'Status' => 'Okay',
