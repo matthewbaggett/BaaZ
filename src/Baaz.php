@@ -2,6 +2,7 @@
 
 namespace Baaz;
 
+use Baaz\Middleware\MemoryLoggerMiddleware;
 use Slim\Container;
 use Solarium\Client as SolrClient;
 use ⌬\Services\EnvironmentService;
@@ -32,5 +33,12 @@ class Baaz extends ⌬
 
             return new SolrClient($config);
         };
+    }
+
+    public function setupMiddlewares(): void
+    {
+        parent::setupMiddlewares();
+        $this->app->add($this->container->get(MemoryLoggerMiddleware::class));
+
     }
 }
