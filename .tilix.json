@@ -3,8 +3,8 @@
         "child1": {
             "child1": {
                 "badge": "BaaZ Stack Log",
-                "directory": "~/Baaz",
-                "overrideCommand": "bash -c \"docker-compose up -d; while true; do docker-compose logs -f --tail=100; done\"",
+                "directory": "/home/geusebio/Baaz",
+                "overrideCommand": "bash -c \"make up -d; while true; do make logs; done\"",
                 "height": 1542,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": true,
@@ -15,7 +15,7 @@
             },
             "child2": {
                 "badge": "BaaZ Stack Watch",
-                "directory": "~/Baaz",
+                "directory": "/home/geusebio/Baaz",
                 "overrideCommand": "bash -c \"while true; do docker stats -a --no-stream > /tmp/docker-stats; (clear; lolcat /tmp/docker-stats); done\"",
                 "height": 525,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
@@ -33,7 +33,7 @@
         "child2": {
             "child1": {
                 "badge": "Workspace Upper",
-                "directory": "~/Baaz",
+                "directory": "/home/geusebio/Baaz",
                 "height": 1035,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
@@ -44,7 +44,7 @@
             },
             "child2": {
                 "badge": "Workspace Lower",
-                "directory": "~/Baaz",
+                "directory": "/home/geusebio/Baaz",
                 "height": 1032,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
