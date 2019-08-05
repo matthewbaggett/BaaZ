@@ -55,6 +55,9 @@ class SolrIngester extends GenericWorker
                         number_format((microtime(true) - $timeStart) * 1000,0)
                     );
                 }
+
+                //Set memory usage statistic in redis.
+                $this->predis->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_peak_usage());
             }
             echo "No work to be done, sleeping...\n";
             while (0 == count($this->predis->keys($match))) {

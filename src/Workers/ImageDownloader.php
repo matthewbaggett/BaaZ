@@ -63,6 +63,9 @@ class ImageDownloader extends GenericWorker
                     $work['product']
                 );
 
+                //Set memory usage statistic in redis.
+                $pipeline->setex('memory:ingester:feed:'.gethostname(), 60, memory_get_peak_usage());
+
                 if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
                     $pipeline->flushPipeline();
                     $tickCount = 0;
