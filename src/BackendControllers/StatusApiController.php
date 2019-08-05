@@ -51,8 +51,8 @@ class StatusApiController extends Controller
             'Status' => 'Okay',
             'Products' => $this->redis->get("count:products"),
             'Queues' => [
-                'Solr' => $this->redis->get("count-worker-queue-solr"),
-                'Image' => $this->redis->get("count-worker-queue-image"),
+                'Solr' => $this->redis->get("count:worker-queue-solr"),
+                'Image' => $this->redis->get("count:worker-queue-image"),
             ],
         ]);
     }
