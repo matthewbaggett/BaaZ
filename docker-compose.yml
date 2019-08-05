@@ -72,8 +72,6 @@ services:
       target: frontend
     image: baaz/frontend
     restart: always
-    ports:
-      - "127.0.0.20:8080:80"
     volumes:
       - ./:/app
       - cache:/app/cache
@@ -88,6 +86,7 @@ services:
       backend:
         condition: service_healthy
     cpus: 0.50
+    scale: 2
     networks:
       - public
       - private
@@ -104,8 +103,6 @@ services:
       target: backend
     image: baaz/backend
     restart: always
-    ports:
-      - "127.0.0.20:8081:80"
     volumes:
       - ./:/app
       - cache:/app/cache
@@ -120,6 +117,7 @@ services:
       solr:
         condition: service_started
     cpus: 0.50
+    scale: 2
     networks:
       - public
       - private

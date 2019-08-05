@@ -2,12 +2,14 @@ region: eu
 tunnels:
   frontend:
     proto: http
-    addr: 127.0.0.20:8080
+    addr: 127.0.0.20:80
     hostname: baaz.eu.ngrok.io
+    host_header: baaz.local
   backend:
     proto: http
-    addr: 127.0.0.20:8081
+    addr: 127.0.0.20:80
     hostname: api.baaz.eu.ngrok.io
+    host_header: api.baaz.local
   ngrok:
     addr: 4040
     proto: http
