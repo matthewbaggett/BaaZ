@@ -70,7 +70,7 @@ class ProductController extends HtmlController
 
         $searchTerms = $request->getAttribute('searchTerms');
 
-        $productsResponse = $this->apiRequest('GET', "v1/api/search/{$searchTerms}?perPage={$numProducts}");
+        $productsResponse = $this->apiRequest('GET', "v1/api/search/{$searchTerms}.json?perPage={$numProducts}");
 
         $this->setTitle($searchTerms);
 
@@ -107,7 +107,7 @@ class ProductController extends HtmlController
     {
         $numProducts = 50;
 
-        $productsResponse = $this->apiRequest('GET', "v1/api/random?perPage={$numProducts}");
+        $productsResponse = $this->apiRequest('GET', "v1/api/random.json?perPage={$numProducts}");
 
         $this->setTitle("{$numProducts} Random Products!");
 

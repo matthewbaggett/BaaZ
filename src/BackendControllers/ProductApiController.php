@@ -60,7 +60,7 @@ class ProductApiController extends Controller
     }
 
     /**
-     * @route GET v1/api/search/{searchTerm}
+     * @route GET v1/api/search/{searchTerm}.json
      *
      * @param Request  $request
      * @param Response $response
@@ -113,7 +113,7 @@ class ProductApiController extends Controller
     }
 
     /**
-     * @route GET v1/api/random
+     * @route GET v1/api/random.json
      *
      * Accepts parameters perPage, currentPage
      *
@@ -151,7 +151,7 @@ class ProductApiController extends Controller
     }
 
     /**
-     * @route GET v1/api/products
+     * @route GET v1/api/products.json
      *
      * @param Request  $request
      * @param Response $response
