@@ -27,26 +27,24 @@ class StatsGenerator extends GenericWorker
             'worker-queue-solr' => 'queue:solr-loader:*',
             'worker-queue-image' => 'queue:image-worker:*',
         ];
-        while (true) {
-            $totals = [];
-            $pipeline = $this->predis->pipeline();
-            foreach ($counts as $countName => $match) {
-                $totals[$countName] = [];
-                foreach (new Keyspace($this->predis, $match) as $key) {
-                    $totals[$countName][] = $key;
-                    $pipeline->sadd('set:'.$countName, $key);
-                }
-                $totals[$countName] = count(array_unique($totals[$countName]));
-                $pipeline->set('count:'.$countName, $totals[$countName]);
-                printf(
-                    "Stats: \"count:%s\" has %d items\n",
-                    $countName,
-                    $totals[$countName]
-                );
+        $totals = [];
+        $pipeline = $this->predis->pipeline();
+        foreach ($counts as $countName => $match) {
+            $totals[$countName] = [];
+            foreach (new Keyspace($this->predis, $match) as $key) {
+                $totals[$countName][] = $key;
+                $pipeline->sadd('set:'.$countName, $key);
             }
-            $pipeline->flushPipeline();
-            echo "Stats generated, sleeping...\n";
-            sleep(5*60);
+            $totals[$countName] = count(array_unique($totals[$countName]));
+            $pipeline->set('count:'.$countName, $totals[$countName]);
+            printf(
+                "Stats: \"count:%s\" has %d items\n",
+                $countName,
+                $totals[$countName]
+            );
         }
+        $pipeline->flushPipeline();
+        echo "Stats generated, sleeping...\n";
+        sleep(5*60);
     }
 }
