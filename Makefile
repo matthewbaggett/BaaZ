@@ -34,6 +34,9 @@ build:
 push:
 	$(COMPOSE_STATEMENT) push $(SERVICE)
 
+restart:
+	$(COMPOSE_STATEMENT) restart $(SERVICE)
+
 up:
 	$(COMPOSE_STATEMENT) \
 		up -d \
@@ -49,7 +52,7 @@ down:
 
 logs:
 	$(COMPOSE_STATEMENT) \
-		 logs -f --tail=100;
+		 logs -f --tail=100 $(SERVICE);
 
 ps:
 	$(COMPOSE_STATEMENT) \
