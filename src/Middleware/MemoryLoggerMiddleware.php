@@ -21,7 +21,7 @@ class MemoryLoggerMiddleware
     public function __invoke(Request $request, Response $response, $next)
     {
         $response = $next($request, $response);
-        $this->predis->setex(sprintf("memory:http:%s", gethostname()), 60, memory_get_peak_usage());
+        $this->predis->setex(sprintf("memory:http:http:%s", gethostname()), 60, memory_get_peak_usage());
         return $response;
     }
 }
