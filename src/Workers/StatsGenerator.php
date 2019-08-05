@@ -22,6 +22,7 @@ class StatsGenerator extends GenericWorker
 
     public function run()
     {
+        printf("Starting to generate stats...\n");
         $counts = [
             'products' => 'product:*',
             'worker-queue-solr' => 'queue:solr-loader:*',
@@ -42,13 +43,16 @@ class StatsGenerator extends GenericWorker
                 $countName,
                 $totals[$countName]
             );
+            $pipeline->flushPipeline();
         }
         //Set memory usage statistic in redis.
-        $this->predis->rpush(sprintf("memory:stats:stats:%s", gethostname()), [memory_get_peak_usage()]);
-        $this->predis->ltrim(sprintf("memory:stats:stats:%s", gethostname()),0,99);
+        $pipeline->rpush(sprintf("memory:stats:stats:%s", gethostname()), [memory_get_peak_usage()]);
+        $pipeline->ltrim(sprintf("memory:stats:stats:%s", gethostname()),0,99);
 
-        $pipeline->flushPipeline();
-        echo "Stats generated, sleeping...\n";
+        printf(
+            "Used %s MB of RAM\nStats generated, sleeping...\n",
+            number_format(memory_get_peak_usage()/1024/1024,2)
+        );
         sleep(5*60);
     }
 }
