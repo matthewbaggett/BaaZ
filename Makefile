@@ -29,12 +29,10 @@ clean: clean-perms clean-docker clean-code
 
 build:
 	composer install --ignore-platform-reqs
-	$(COMPOSE_STATEMENT) \
-		 build --pull
+	$(COMPOSE_STATEMENT) build --pull $(SERVICE)
 
 push:
-	$(COMPOSE_STATEMENT) \
-		 push
+	$(COMPOSE_STATEMENT) push $(SERVICE)
 
 up:
 	$(COMPOSE_STATEMENT) \
