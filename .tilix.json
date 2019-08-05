@@ -3,9 +3,9 @@
         "child1": {
             "child1": {
                 "badge": "BaaZ Stack Log",
-                "directory": "/home/geusebio/Baaz",
+                "directory": "\/home\/geusebio\/Baaz",
+                "height": 1346,
                 "overrideCommand": "bash -c \"make up -d; while true; do make logs; done\"",
-                "height": 1542,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": true,
                 "synchronizedInput": true,
@@ -14,27 +14,46 @@
                 "width": 1920
             },
             "child2": {
-                "badge": "BaaZ Stack Watch",
-                "directory": "/home/geusebio/Baaz",
-                "overrideCommand": "bash -c \"while true; do docker stats -a --no-stream > /tmp/docker-stats; (clear; lolcat /tmp/docker-stats); done\"",
-                "height": 525,
-                "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
-                "readOnly": true,
-                "synchronizedInput": true,
-                "type": "Terminal",
-                "uuid": "61fc1bd0-952b-430e-a05c-75552bce133c",
-                "width": 1920
+                "child1": {
+                    "badge": "BaaZ Stack Watch",
+                    "directory": "\/home\/geusebio\/Baaz",
+                    "height": 334,
+                    "overrideCommand": "bash -c \"while true; do docker stats -a --no-stream > \/tmp\/docker-stats; (clear; lolcat \/tmp\/docker-stats); done\"",
+                    "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                    "readOnly": true,
+                    "synchronizedInput": true,
+                    "type": "Terminal",
+                    "uuid": "61fc1bd0-952b-430e-a05c-75552bce133c",
+                    "width": 1920
+                },
+                "child2": {
+                    "badge": "BaaZ Stack Health",
+                    "directory": "\/home\/geusebio\/Baaz",
+                    "height": 331,
+                    "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                    "overrideCommand": "bash -c \"while true; do make ps > \/tmp\/docker-ps; (clear; lolcat \/tmp\/docker-ps); done\"",
+
+                    "readOnly": true,
+                    "synchronizedInput": true,
+                    "type": "Terminal",
+                    "uuid": "e2ba8ef9-a810-4f4a-a230-b82ec4202552",
+                    "width": 1920
+                },
+                "orientation": 1,
+                "position": 16,
+                "ratio": 0.5,
+                "type": "Paned"
             },
             "orientation": 1,
-            "position": 74,
-            "ratio": 0.744927536231884013,
+            "position": 66,
+            "ratio": 0.66732771442736738,
             "type": "Paned"
         },
         "child2": {
             "child1": {
-                "badge": "Workspace Upper",
-                "directory": "/home/geusebio/Baaz",
-                "height": 1035,
+                "badge": "BaaZ Workspace Upper",
+                "directory": "\/home\/geusebio\/Baaz",
+                "height": 1008,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
                 "synchronizedInput": true,
@@ -43,9 +62,9 @@
                 "width": 1917
             },
             "child2": {
-                "badge": "Workspace Lower",
-                "directory": "/home/geusebio/Baaz",
-                "height": 1032,
+                "badge": "BaaZ Workspace Lower",
+                "directory": "\/home\/geusebio\/Baaz",
+                "height": 1006,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
                 "synchronizedInput": true,
@@ -63,7 +82,7 @@
         "ratio": 0.5,
         "type": "Paned"
     },
-    "height": 2070,
+    "height": 2017,
     "name": "Default",
     "synchronizedInput": false,
     "type": "Session",

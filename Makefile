@@ -47,6 +47,14 @@ down:
 	$(COMPOSE_STATEMENT) \
 		 down --remove-orphans;
 
+logs:
+	$(COMPOSE_STATEMENT) \
+		 logs -f --tail=100;
+
+ps:
+	$(COMPOSE_STATEMENT) \
+		 ps
+
 test:
 	-vendor/bin/php-cs-fixer fix
 	vendor/bin/phpcs --warning-severity=6 --standard=PSR2 src tests

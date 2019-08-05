@@ -10,9 +10,3 @@ tunnels:
     addr: 127.0.0.20:80
     hostname: api.baaz.eu.ngrok.io
     host_header: api.baaz.local
-  ngrok:
-    addr: 4040
-    proto: http
-    auth: "admin:CaptainMorgan"
-    inspect: false
-    hostname: ngrok.baaz.eu.ngrok.io
