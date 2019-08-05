@@ -1,8 +1,15 @@
 FILE1 = docker-compose.`hostname`.yml
 ifeq ($(shell test -e $(FILE1) && echo -n yes),yes)
-    COMPOSE_STATEMENT = docker-compose -f docker-compose.yml -f docker-compose.`hostname`.yml
+    COMPOSE_STATEMENT = docker-compose \
+    						-f docker-compose.data.yml \
+    						-f docker-compose.http.yml \
+    						-f docker-compose.workers.yml \
+    						-f docker-compose.`hostname`.yml
 else
-    COMPOSE_STATEMENT = docker-compose
+    COMPOSE_STATEMENT = docker-compose \
+    						-f docker-compose.data.yml \
+    						-f docker-compose.http.yml \
+    						-f docker-compose.workers.yml
 endif
 
 setup:
@@ -38,6 +45,10 @@ up:
 			worker-solr \
 			worker-stats
 
+down:
+	$(COMPOSE_STATEMENT) \
+		 down -v --remove-orphans;
+
 test:
 	-vendor/bin/php-cs-fixer fix
 	vendor/bin/phpcs --warning-severity=6 --standard=PSR2 src tests
@@ -55,9 +66,7 @@ cli-backend:
 	$(COMPOSE_STATEMENT) \
 		run backend /bin/bash
 
-wipe:
-	$(COMPOSE_STATEMENT) \
-		 down -v --remove-orphans;
+wipe: down
 	sudo rm -Rfv /media/fantec/docker/baaz/solr/*
 	#sudo rm -Rfv /media/fantec/docker/baaz/persist/*
 	sudo rm -Rfv /media/fantec/docker/baaz/db/*

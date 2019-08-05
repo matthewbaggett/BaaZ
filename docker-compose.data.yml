@@ -1,0 +1,33 @@
+version: '2.4'
+
+networks:
+  private:
+
+services:
+
+  redis-backend:
+    image: redis:5
+    restart: always
+    ports:
+      - 127.0.0.20:6379:6379
+    command: redis-server --appendonly yes
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  solr:
+    image: solr
+    restart: always
+    ports:
+      - "127.0.0.20:8983:8983"
+    networks:
+      - private
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - mycore
