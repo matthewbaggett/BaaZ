@@ -41,11 +41,11 @@ class SolrIngester extends GenericWorker
                 $update->addDocument($document);
                 $update->addCommit();
                 $result = $solr->update($update);
-                if($result->getResponse()->getStatusMessage() == 'OK') {
+                if ('OK' == $result->getResponse()->getStatusMessage()) {
                     $this->predis->del($key);
                     printf(
-                        'Wrote Product %s to Solr, %d left in queue' . PHP_EOL,
-                        "http://baaz.local/" . $product->getSlug(),
+                        'Wrote Product %s to Solr, %d left in queue'.PHP_EOL,
+                        'http://baaz.local/'.$product->getSlug(),
                         count($this->predis->keys($match))
                     );
                 }

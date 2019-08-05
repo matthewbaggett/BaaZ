@@ -56,14 +56,6 @@ class Product extends MultiMediaModel
         }
     }
 
-    public function setEan($ean): self {
-        if(strlen($ean) > 13){
-            $ean = substr($ean,0,13);
-        }
-        $this->ean = $ean;
-        return $this;
-    }
-
     protected function __map(array $inputData, array $mapping): self
     {
         foreach ($inputData as $k => $v) {
@@ -91,6 +83,16 @@ class Product extends MultiMediaModel
                 'Images' => $images,
             ]
         );
+    }
+
+    public function setEan($ean): self
+    {
+        if (strlen($ean) > 13) {
+            $ean = substr($ean, 0, 13);
+        }
+        $this->ean = $ean;
+
+        return $this;
     }
 
     public function ingest($json): self
@@ -165,7 +167,7 @@ class Product extends MultiMediaModel
             if ($v) {
                 if (!(is_string($v) || is_numeric($v))) {
                     $v = \GuzzleHttp\json_encode($v);
-                }else{
+                } else {
                     $v = addslashes($v);
                 }
                 $solrDocument->{$k} = $v;

@@ -2,8 +2,6 @@
 
 namespace Baaz\Workers;
 
-use Baaz\Models\Product;
-use Baaz\Workers\Traits\SolrWorkerTrait;
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
 use ⌬\Services\EnvironmentService;
@@ -32,14 +30,14 @@ class StatsGenerator extends GenericWorker
         while (true) {
             $totals = [];
             $pipeline = $this->predis->pipeline();
-            foreach($counts as $countName => $match) {
+            foreach ($counts as $countName => $match) {
                 $totals[$countName] = [];
                 foreach (new Keyspace($this->predis, $match) as $key) {
                     $totals[$countName][] = $key;
-                    $pipeline->sadd('set:' . $countName, $key);
+                    $pipeline->sadd('set:'.$countName, $key);
                 }
                 $totals[$countName] = count(array_unique($totals[$countName]));
-                $pipeline->set('count:' . $countName, $totals[$countName]);
+                $pipeline->set('count:'.$countName, $totals[$countName]);
             }
             $pipeline->flushPipeline();
             echo "Stats generated, sleeping...\n";

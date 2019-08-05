@@ -9,8 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Solarium\Client as SolrClient;
-use Solarium\Core\Query\Result\ResultInterface;
-use Solarium\QueryType\Select\Query\Query;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\Controller;
 use ⌬\Log\Logger;
@@ -58,5 +56,4 @@ class StatusApiController extends Controller
             'Products' => $product->__toArray(),
         ]);
     }
-
 }
