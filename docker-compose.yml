@@ -80,10 +80,10 @@ services:
       - persist:/app/persist
       - ./src/FrontendControllers:/app/src/Controllers:ro
     environment:
-      REDIS_HOST: tcp://redis-frontend:6379
+      REDIS_HOST: tcp://redis-backend:6379
       BAAZ_BACKEND: http://backend/
     depends_on:
-      redis-frontend:
+      redis-backend:
         condition: service_healthy
       backend:
         condition: service_healthy
@@ -207,23 +207,23 @@ services:
       REDIS_HOST: tcp://redis-backend:6379
     cpus: 0.20
 
-  redis-frontend:
-    image: redis:5
-    restart: always
-    ports:
-      - 127.0.0.20:6378:6379
-    command: redis-server --appendonly yes
-    volumes:
-      - cache-frontend-persist:/data
-    networks:
-      - private
-    healthcheck:
-      test: ["CMD", "redis-cli", "PING"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    cpus: 0.70
+  #redis-frontend:
+  #  image: redis:5
+  #  restart: always
+  #  ports:
+  #    - 127.0.0.20:6378:6379
+  #  command: redis-server --appendonly yes
+  #  volumes:
+  #    - cache-frontend-persist:/data
+  #  networks:
+  #    - private
+  #  healthcheck:
+  #    test: ["CMD", "redis-cli", "PING"]
+  #    interval: 30s
+  #    timeout: 10s
+  #    retries: 3
+  #    start_period: 20s
+  #  cpus: 0.70
 
   redis-backend:
     image: redis:5
