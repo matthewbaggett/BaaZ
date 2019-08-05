@@ -51,7 +51,7 @@ class StatusApiController extends Controller
         $memoryUsage = [];
         foreach($memoryKeys as $memoryKey){
             list($memory, $set, $task, $node) = explode(":", $memoryKey);
-            $memoryUsage[$set][$task][$node] = $this->redis->get($memoryKey);
+            $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = $this->redis->get($memoryKey);
         }
         return $response->withJson([
             'Status' => 'Okay',
