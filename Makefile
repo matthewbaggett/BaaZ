@@ -34,17 +34,26 @@ build:
 push:
 	$(COMPOSE_STATEMENT) push $(SERVICE)
 
-restart:
-	$(COMPOSE_STATEMENT) restart $(SERVICE)
+stop:
+	$(COMPOSE_STATEMENT) stop $(SERVICE)
+
+start:
+	$(COMPOSE_STATEMENT) start $(SERVICE)
+
+restart: stop start
 
 up:
 	$(COMPOSE_STATEMENT) \
-		up -d \
+		up -d --remove-orphans \
 			traefik \
 			worker-feed \
 			worker-images \
 			worker-solr \
 			worker-stats
+
+run:
+	$(COMPOSE_STATEMENT) \
+		 up --remove-orphans $(SERVICE)
 
 down:
 	$(COMPOSE_STATEMENT) \
