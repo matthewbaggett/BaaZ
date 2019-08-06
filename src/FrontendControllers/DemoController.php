@@ -40,6 +40,8 @@ class DemoController extends HtmlController
             'base_uri' => 'http://'.gethostname(),
             'timeout' => 2.0,
         ]);
+
+        $this->redis->client('SETNAME', get_called_class());
     }
 
     /**

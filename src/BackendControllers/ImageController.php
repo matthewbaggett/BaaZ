@@ -36,6 +36,7 @@ class ImageController extends HtmlController
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
+        $this->redis->client('SETNAME', get_called_class());
     }
 
     /**

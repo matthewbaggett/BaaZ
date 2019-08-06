@@ -37,6 +37,7 @@ class ProductApiController extends Controller
         $this->redis = $redis;
         $this->logger = $logger;
         $this->solr = $solr;
+        $this->redis->client('SETNAME', get_called_class());
     }
 
     /**
