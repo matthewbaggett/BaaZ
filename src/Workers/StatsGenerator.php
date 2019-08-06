@@ -27,6 +27,7 @@ class StatsGenerator extends GenericWorker
         $counts = [
             'products' => 'product:*',
             'worker-queue-solr' => 'queue:solr-loader:*',
+            'worker-queue-solr-reject' => 'queue:solr-reject:*',
             'worker-queue-image' => 'queue:image-worker:*',
         ];
         $totals = [];
