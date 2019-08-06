@@ -4,6 +4,7 @@ namespace Baaz\Workers;
 
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
+use Predis\Response\ServerException;
 use ⌬\Services\EnvironmentService;
 
 class StatsGenerator extends GenericWorker
@@ -29,30 +30,40 @@ class StatsGenerator extends GenericWorker
             'worker-queue-image' => 'queue:image-worker:*',
         ];
         $totals = [];
-        $pipeline = $this->predis->pipeline();
-        foreach ($counts as $countName => $match) {
-            $totals[$countName] = [];
-            foreach (new Keyspace($this->predis, $match) as $key) {
-                $totals[$countName][] = $key;
-                $pipeline->sadd('set:'.$countName, $key);
+        try {
+            $pipeline = $this->predis->pipeline();
+            foreach ($counts as $countName => $match) {
+                $totals[$countName] = [];
+                foreach (new Keyspace($this->predis, $match) as $key) {
+                    $totals[$countName][] = $key;
+                    $pipeline->sadd('set:' . $countName, $key);
+                }
+                $totals[$countName] = count(array_unique($totals[$countName]));
+                $pipeline->set('count:' . $countName, $totals[$countName]);
+                printf(
+                    "Stats: \"count:%s\" has %d items\n",
+                    $countName,
+                    $totals[$countName]
+                );
+                $pipeline->flushPipeline();
             }
-            $totals[$countName] = count(array_unique($totals[$countName]));
-            $pipeline->set('count:'.$countName, $totals[$countName]);
-            printf(
-                "Stats: \"count:%s\" has %d items\n",
-                $countName,
-                $totals[$countName]
-            );
-            $pipeline->flushPipeline();
-        }
-        //Set memory usage statistic in redis.
-        $pipeline->rpush(sprintf('memory:stats:stats:%s', gethostname()), [memory_get_peak_usage()]);
-        $pipeline->ltrim(sprintf('memory:stats:stats:%s', gethostname()), 0, 99);
 
-        printf(
-            "Used %s MB of RAM\nStats generated, sleeping...\n",
-            number_format(memory_get_peak_usage() / 1024 / 1024, 2)
-        );
-        sleep(5 * 60);
+            //Set memory usage statistic in redis.
+            $pipeline->rpush(sprintf('memory:stats:stats:%s', gethostname()), [memory_get_peak_usage()]);
+            $pipeline->ltrim(sprintf('memory:stats:stats:%s', gethostname()), 0, 99);
+
+            printf(
+                "Used %s MB of RAM\nStats generated, sleeping...\n",
+                number_format(memory_get_peak_usage() / 1024 / 1024, 2)
+            );
+            sleep(5 * 60);
+        }catch(ServerException $exception) {
+            printf(
+                "Exception %s connecting to REDIS %s, sleeping and trying again...\n",
+                get_class($exception),
+                $exception->getMessage()
+            );
+            sleep(15);
+        }
     }
 }
