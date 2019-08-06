@@ -48,10 +48,9 @@ class SolrIngester extends GenericWorker
                         if ('OK' == $result->getResponse()->getStatusMessage()) {
 
                             printf(
-                                'Wrote Product %s to Solr in %s ms, %d left in queue' . PHP_EOL,
+                                'Wrote Product %s to Solr in %s ms' . PHP_EOL,
                                 'http://baaz.local/' . $product->getSlug(),
-                                number_format((microtime(true) - $timeStart) * 1000, 0),
-                                count($this->predis->keys($match))
+                                number_format((microtime(true) - $timeStart) * 1000, 0)
                             );
 
                             // Remove the key from the queue, we're done with it.
