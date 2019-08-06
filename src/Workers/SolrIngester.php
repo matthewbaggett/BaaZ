@@ -57,7 +57,7 @@ class SolrIngester extends GenericWorker
         $document = $product->createSolrDocument($update);
         $update->addDocument($document);
         $update->addCommit();
-        $this->waypoint('Create Solr Document');
+        $this->waypoint('Create Solr Document', 500);
 
         try {
             $result = $solr->update($update);

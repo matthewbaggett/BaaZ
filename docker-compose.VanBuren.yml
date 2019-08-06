@@ -41,7 +41,7 @@ services:
   solr:
     volumes:
       - solr-persist:/opt/solr/server/solr/mycores
-    cpus: 0.70
+    cpus: 0.30
 
 
 volumes:

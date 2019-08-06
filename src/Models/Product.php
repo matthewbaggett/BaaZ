@@ -145,10 +145,16 @@ class Product extends MultiMediaModel
 
     public function load($uuid): MultiMediaModel
     {
+        $this->pictures = [];
         $return = parent::load($uuid);
 
         if (is_string($this->pictures)) {
             $this->pictures = json_decode($this->pictures);
+        }
+
+        // Squash Nonsense giant arrays of pictures
+        if(is_array($this->pictures) && count($this->pictures) > 50){
+            $this->pictures = [];
         }
 
         if (is_array($this->pictures) && count($this->pictures) > 0) {
