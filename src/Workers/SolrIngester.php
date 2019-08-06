@@ -33,6 +33,7 @@ class SolrIngester extends GenericWorker
             try {
                 foreach (new Keyspace($this->predis, $match) as $key) {
                     $solr = $this->getSolr();
+
                     $timeStart = microtime(true);
                     $productUUID = $this->predis->get($key);
                     /** @var Product $product */
@@ -46,7 +47,6 @@ class SolrIngester extends GenericWorker
                     try {
                         $result = $solr->update($update);
                         if ('OK' == $result->getResponse()->getStatusMessage()) {
-
                             printf(
                                 'Wrote Product %s to Solr in %s ms' . PHP_EOL,
                                 'http://baaz.local/' . $product->getSlug(),
@@ -84,6 +84,8 @@ class SolrIngester extends GenericWorker
 
                         // Move the key to the reject queue.
                         $this->predis->rename($key, str_replace("solr-loader", "solr-reject", $key));
+                    }finally {
+                        unset($solr);
                     }
                 }
                 //Set memory usage statistic in redis.
@@ -96,7 +98,8 @@ class SolrIngester extends GenericWorker
                 }
             }catch (PredisException $exception){
                 printf(
-                    'Something went wrong talking to redis - Gonna give it a moment and try again: %s' . PHP_EOL,
+                    'Something went wrong talking to redis (%s) - Gonna give it a moment and try again: %s' . PHP_EOL,
+                    get_class($exception),
                     $exception->getMessage()
                 );
                 sleep(5);
