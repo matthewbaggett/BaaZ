@@ -2,24 +2,12 @@
 
 namespace Baaz\Workers;
 
-use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
 use Predis\Response\ServerException;
-use ⌬\Services\EnvironmentService;
 
 class StatsGenerator extends GenericWorker
 {
     public const CACHE_PATH = __DIR__.'/../../cache/';
-    /** @var Predis */
-    protected $predis;
-
-    public function __construct(
-        Predis $predis,
-        EnvironmentService $environmentService
-    ) {
-        $this->predis = $predis;
-        parent::__construct($environmentService);
-    }
 
     public function run()
     {
@@ -29,18 +17,20 @@ class StatsGenerator extends GenericWorker
             'worker-queue-solr' => 'queue:solr-loader:*',
             'worker-queue-solr-reject' => 'queue:solr-reject:*',
             'worker-queue-image' => 'queue:image-worker:*',
+            'worker-queue-image-failed' => 'queue:image-failed:*',
         ];
         $totals = [];
+
         try {
             $pipeline = $this->predis->pipeline();
             foreach ($counts as $countName => $match) {
                 $totals[$countName] = [];
                 foreach (new Keyspace($this->predis, $match) as $key) {
                     $totals[$countName][] = $key;
-                    $pipeline->sadd('set:' . $countName, $key);
+                    $pipeline->sadd('set:'.$countName, $key);
                 }
                 $totals[$countName] = count(array_unique($totals[$countName]));
-                $pipeline->set('count:' . $countName, $totals[$countName]);
+                $pipeline->set('count:'.$countName, $totals[$countName]);
                 printf(
                     "Stats: \"count:%s\" has %d items\n",
                     $countName,
@@ -58,7 +48,7 @@ class StatsGenerator extends GenericWorker
                 number_format(memory_get_peak_usage() / 1024 / 1024, 2)
             );
             sleep(5 * 60);
-        }catch(ServerException $exception) {
+        } catch (ServerException $exception) {
             printf(
                 "Exception %s connecting to REDIS %s, sleeping and trying again...\n",
                 get_class($exception),

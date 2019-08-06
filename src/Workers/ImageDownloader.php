@@ -4,9 +4,7 @@ namespace Baaz\Workers;
 
 use Baaz\Models\Image;
 use Baaz\Workers\Traits\GuzzleWorkerTrait;
-use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
-use ⌬\Services\EnvironmentService;
 use ⌬\UUID\UUID;
 
 class ImageDownloader extends GenericWorker
@@ -14,16 +12,6 @@ class ImageDownloader extends GenericWorker
     use GuzzleWorkerTrait;
 
     public const CACHE_PATH = __DIR__.'/../../cache/';
-    /** @var Predis */
-    protected $predis;
-
-    public function __construct(
-        Predis $predis,
-        EnvironmentService $environmentService
-    ) {
-        $this->predis = $predis;
-        parent::__construct($environmentService);
-    }
 
     public function run()
     {
@@ -33,40 +21,46 @@ class ImageDownloader extends GenericWorker
             $tickCount = 0;
             $timeSinceFlush = time();
             foreach (new Keyspace($this->predis, $match) as $key) {
+                $failedKey = str_replace('image-worker', 'image-failed', $key);
                 ++$tickCount;
                 $work = $this->predis->hgetall($key);
 
                 try {
                     $imageData = $this->getGuzzle()->get($work['url']);
                     $this->predis->del($key);
+
+                    $image = Image::Factory()
+                        ->setFileData($imageData->getBody()->getContents())
+                        ->setProductUUID($work['product'])
+                        ->save($pipeline)
+                    ;
+
+                    $picturesUUIDs = $this->predis->hget("product:{$work['product']}", 'pictures');
+                    if (null === ($picturesUUIDs = json_decode($picturesUUIDs))) {
+                        $picturesUUIDs = [];
+                    }
+
+                    $picturesUUIDs[] = $image->getUuid();
+
+                    $pipeline->hset("product:{$work['product']}", 'pictures', json_encode($picturesUUIDs));
+
+                    // And add the product to a queue for the solr-loader
+                    $pipeline->set(
+                        sprintf('%s:%s:%s', 'queue', 'solr-loader', UUID::v4()),
+                        $work['product']
+                    );
+
+                    if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
+                        $pipeline->flushPipeline();
+                        $tickCount = 0;
+                        $timeSinceFlush = time();
+                    }
                 } catch (\Exception $e) {
-                }
-
-                $image = Image::Factory()
-                    ->setFileData($imageData->getBody()->getContents())
-                    ->setProductUUID($work['product'])
-                    ->save($pipeline)
-                ;
-
-                $picturesUUIDs = $this->predis->hget("product:{$work['product']}", 'pictures');
-                if (null === ($picturesUUIDs = json_decode($picturesUUIDs))) {
-                    $picturesUUIDs = [];
-                }
-
-                $picturesUUIDs[] = $image->getUuid();
-
-                $pipeline->hset("product:{$work['product']}", 'pictures', json_encode($picturesUUIDs));
-
-                // And add the product to a queue for the solr-loader
-                $pipeline->set(
-                    sprintf('%s:%s:%s', 'queue', 'solr-loader', UUID::v4()),
-                    $work['product']
-                );
-
-                if ($tickCount > 200 || $timeSinceFlush < time() - 60) {
-                    $pipeline->flushPipeline();
-                    $tickCount = 0;
-                    $timeSinceFlush = time();
+                    printf(
+                        'Failed to download %s, moved to failure list'.PHP_EOL,
+                        $work['url']
+                    );
+                    $this->predis->rename($key, $failedKey);
                 }
             }
             //Set memory usage statistic in redis.

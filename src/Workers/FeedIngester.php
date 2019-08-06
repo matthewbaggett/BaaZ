@@ -4,10 +4,8 @@ namespace Baaz\Workers;
 
 use Baaz\Models\Product;
 use Baaz\Workers\Traits\GuzzleWorkerTrait;
-use Predis\Client as Predis;
 use QXS\WorkerPool\ClosureWorker;
 use QXS\WorkerPool\Semaphore;
-use ⌬\Services\EnvironmentService;
 use ⌬\UUID\UUID;
 
 class FeedIngester extends GenericWorker
@@ -16,19 +14,7 @@ class FeedIngester extends GenericWorker
 
     public const CACHE_PATH = __DIR__.'/../../cache/';
 
-    /** @var Predis */
-    protected $predis;
-
     protected $slowMode = true;
-
-    public function __construct(
-        Predis $predis,
-        EnvironmentService $environmentService
-    ) {
-        parent::__construct($environmentService);
-
-        $this->predis = $predis;
-    }
 
     public function run(): void
     {
