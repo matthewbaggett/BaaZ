@@ -58,6 +58,11 @@ ps:
 	$(COMPOSE_STATEMENT) \
 		 ps
 
+redis-cli:
+	$(COMPOSE_STATEMENT) \
+		exec redis-backend \
+		redis-cli
+
 test:
 	-vendor/bin/php-cs-fixer fix
 	vendor/bin/phpcs --warning-severity=6 --standard=PSR2 src tests
