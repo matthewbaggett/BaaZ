@@ -3,18 +3,16 @@
 namespace Baaz\Workers;
 
 use Baaz\Models\Product;
+use Baaz\QueuesAndLists;
 use Baaz\Workers\Traits\GuzzleWorkerTrait;
 use QXS\WorkerPool\ClosureWorker;
 use QXS\WorkerPool\Semaphore;
-use ⌬\UUID\UUID;
 
 class FeedIngester extends GenericWorker
 {
     use GuzzleWorkerTrait;
 
     public const CACHE_PATH = __DIR__.'/../../cache/';
-
-    protected $slowMode = true;
 
     public function run(): void
     {
@@ -39,45 +37,43 @@ class FeedIngester extends GenericWorker
                     }
 
                     $pipeline = $this->predis->pipeline();
+                    $queue = $this->queueManager->getQueue(QueuesAndLists::QueueWorkerDownloadImages);
 
-                    $queuedRecords = 0;
                     foreach (gzfile($ljsonGzPath) as $jsonLine) {
-                        ++$queuedRecords;
-
                         try {
+                            $productsList = $this->listManager->getList(QueuesAndLists::ListProducts);
+
                             $product = new Product();
                             $json = \GuzzleHttp\json_decode($jsonLine, true);
                             $product->ingest($json);
-                            $product->save($pipeline);
+                            $product->setId($productsList->getLength() + 1);
+                            //$product->save($pipeline);
+                            $productsList->addItem($product->__toArray(), ['uuid' => $product->getUuid()]);
+                            printf(
+                                'Wrote Product %s to Redis as %d keys %s'.PHP_EOL,
+                                $product->getName(),
+                                count($product->__toArray()),
+                                method_exists($product, 'getSlug') ? sprintf('( http://baaz.local/%s )', $product->getSlug()) : null
+                            );
 
                             // Add the product images to a queue for the image-worker
                             foreach ($product->getCacheableImageUrls() as $imageUrl) {
-                                $pipeline->hmset(
-                                    sprintf('%s:%s:%s', 'queue', 'image-worker', UUID::v4()),
-                                    [
-                                        'url' => $imageUrl,
-                                        'product' => $product->getUuid(),
-                                    ]
-                                );
+                                $queue->addItem([
+                                    'url' => $imageUrl,
+                                    'product' => $product->getUuid(),
+                                ]);
                             }
 
-                            //Set memory usage statistic in redis.
-                            $this->predis->rpush(sprintf('memory:ingester:feed:%s', gethostname()), [memory_get_peak_usage()]);
-                            $this->predis->ltrim(sprintf('memory:ingester:feed:%s', gethostname()), 0, 99);
+                            $this->updateMemoryUsage();
                         } catch (\Exception $e) {
                             echo $e->getMessage()."\n";
                         }
-                        if ($queuedRecords > 200 || $this->slowMode) {
-                            $pipeline->flushPipeline(true);
-                            $queuedRecords = 0;
-                        }
-                        if ($this->slowMode) {
-                            $sleep = $this->environmentService->get('DELAY_PER_ITEM_MS', 0) * 1000;
-                            printf("Sleeping for %s seconds...\n", number_format($sleep / 1000000, 3));
-                            usleep($sleep);
-                        }
+
+                        $pipeline->flushPipeline(true);
+                        $sleep = $this->environmentService->get('DELAY_PER_ITEM_MS', 0) * 1000;
+                        printf("Sleeping for %s seconds...\n", number_format($sleep / 1000000, 3));
+                        usleep($sleep);
                     }
-                    $pipeline->flushPipeline(true);
                 }
             }
         ));

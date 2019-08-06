@@ -12,6 +12,14 @@ use ⌬\⌬;
 
 class Baaz extends ⌬
 {
+    public function updateMemoryUsage($keY)
+    {
+        $this->predis->sadd($memKey, [memory_get_peak_usage()]);
+        if (($scard = $this->predis->scard($memKey)) >= 100) {
+            $this->predis->spop($memKey, 100 - $scard);
+        }
+    }
+
     public function setupDependencies(): void
     {
         parent::setupDependencies();

@@ -20,7 +20,7 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 60000
+      DELAY_PER_ITEM_MS: 0
 
   worker-images:
     build:
@@ -56,19 +56,3 @@ services:
     environment:
       REDIS_HOST: tcp://redis-backend:6379
       SOLR_HOST: tcp://solr:8983
-
-  worker-stats:
-    build:
-      context: .
-      target: worker-stats
-    image: baaz/worker-stats
-    restart: always
-    volumes:
-      - ./:/app
-    networks:
-      - private
-    depends_on:
-      redis-backend:
-        condition: service_healthy
-    environment:
-      REDIS_HOST: tcp://redis-backend:6379

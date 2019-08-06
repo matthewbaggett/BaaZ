@@ -2,6 +2,7 @@
 
 namespace Baaz\Middleware;
 
+use Baaz\Redis\MemoryUsage;
 use Predis\Client as Predis;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -13,21 +14,29 @@ class MemoryLoggerMiddleware
     private $predis;
     /** @var EnvironmentService */
     private $environmentService;
+    /** @var MemoryUsage */
+    private $memoryUsage;
 
     public function __construct(
         Predis $predis,
-        EnvironmentService $environmentService
+        EnvironmentService $environmentService,
+        MemoryUsage $memoryUsage
     ) {
         $this->predis = $predis;
         $this->environmentService = $environmentService;
+        $this->memoryUsage = $memoryUsage;
     }
 
     public function __invoke(Request $request, Response $response, $next)
     {
         $response = $next($request, $response);
         $serviceName = $this->environmentService->get('SERVICE_NAME', 'http');
-        $this->predis->rpush(sprintf('memory:http:%s:%s', $serviceName, gethostname()), [memory_get_peak_usage()]);
-        $this->predis->ltrim(sprintf('memory:http:%s:%s', $serviceName, gethostname()), 0, 100);
+
+        $this->memoryUsage->updateMemory(sprintf(
+            'memory:http:%s:%s',
+            $serviceName,
+            gethostname()
+        ));
 
         return $response;
     }

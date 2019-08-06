@@ -2,28 +2,43 @@
 
 namespace Baaz\Workers;
 
+use Baaz\Baaz;
+use Baaz\Redis\MemoryUsage;
 use Predis\Client as Predis;
 use QXS\WorkerPool\WorkerPool;
 use WyriHaximus\CpuCoreDetector\Detector;
+use ⌬\Redis\Queue\ItemListManager;
+use ⌬\Redis\Queue\ItemQueueManager;
 use ⌬\Services\EnvironmentService;
 
 abstract class GenericWorker
 {
     /** @var EnvironmentService */
     protected $environmentService;
-
+    /** @var float */
     protected $startTime;
-
     /** @var Predis */
     protected $predis;
+    /** @var ItemQueueManager */
+    protected $queueManager;
+    /** @var ItemListManager */
+    protected $listManager;
+    /** @var MemoryUsage */
+    protected $memoryUsage;
 
     public function __construct(
         Predis $predis,
-        EnvironmentService $environmentService
+        EnvironmentService $environmentService,
+        ItemQueueManager $queueManager,
+        ItemListManager $listManager,
+        MemoryUsage $memoryUsage
     ) {
         $this->predis = $predis;
-        $this->predis->client('SETNAME', get_called_class());
+        $this->predis->client('SETNAME', $this->getCalledClassStub());
+        $this->queueManager = $queueManager;
+        $this->listManager = $listManager;
         $this->environmentService = $environmentService;
+        $this->memoryUsage = $memoryUsage;
         $this->resetStopwatch();
     }
 
@@ -73,6 +88,24 @@ abstract class GenericWorker
             if (method_exists($this, 'iter')) {
                 $this->iter();
             }
+            $this->updateMemoryUsage();
         }
+    }
+
+    public function updateMemoryUsage()
+    {
+        //Send memory usage statistic in redis.
+        $this->memoryUsage->updateMemory(sprintf(
+            'memory:worker:%s:%s',
+            $this->getCalledClassStub(),
+            gethostname()
+        ));
+    }
+
+    private function getCalledClassStub(): string
+    {
+        $classFragments = explode('\\', get_called_class());
+
+        return end($classFragments);
     }
 }

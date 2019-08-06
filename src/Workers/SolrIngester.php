@@ -3,9 +3,8 @@
 namespace Baaz\Workers;
 
 use Baaz\Models\Product;
+use Baaz\QueuesAndLists;
 use Baaz\Workers\Traits\SolrWorkerTrait;
-use Predis\Collection\Iterator\Keyspace;
-use Predis\PredisException;
 use Solarium\Exception as SolrException;
 
 class SolrIngester extends GenericWorker
@@ -16,41 +15,31 @@ class SolrIngester extends GenericWorker
 
     public function iterator()
     {
-        $match = 'queue:solr-loader:*';
-
-        try {
-            foreach (new Keyspace($this->predis, $match) as $key) {
-                $this->iter($key);
-            }
-            //Set memory usage statistic in redis.
-            $this->predis->rpush(sprintf('memory:ingester:solr:%s', gethostname()), [memory_get_peak_usage()]);
-            $this->predis->ltrim(sprintf('memory:ingester:solr:%s', gethostname()), 0, 99);
-
-            echo "No work to be done, sleeping...\n";
-            while (0 == count($this->predis->keys($match))) {
+        while (true) {
+            $this->resetStopwatch();
+            if (null !== ($queuedProduct = $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolr)->getNextItem())) {
+                $this->iter($queuedProduct);
+            } else {
                 sleep(5);
             }
-        } catch (PredisException $exception) {
-            printf(
-                'Something went wrong talking to redis (%s) - Gonna give it a moment and try again: %s'.PHP_EOL,
-                get_class($exception),
-                $exception->getMessage()
-            );
-            sleep(5);
         }
     }
 
-    public function iter($key): void
+    public function iter($queuedProduct): void
     {
         $this->resetStopwatch();
         $solr = $this->getSolr();
         $this->waypoint('GetSolr');
 
         $timeStart = microtime(true);
-        $productUUID = $this->predis->get($key);
-        $this->waypoint('Get ProductUUID');
+
         /** @var Product $product */
-        $product = (new Product())->load($productUUID);
+        $product = new Product(
+            $this->listManager
+                ->getList(QueuesAndLists::ListProducts)
+                ->find($queuedProduct['product'])
+        );
+
         $this->waypoint('Load Product');
         $update = $solr->createUpdate();
 
@@ -70,9 +59,6 @@ class SolrIngester extends GenericWorker
                     'http://baaz.local/'.$product->getSlug(),
                     number_format((microtime(true) - $timeStart) * 1000, 0)
                 );
-
-                // Remove the key from the queue, we're done with it.
-                $this->predis->del($key);
             } else {
                 $this->waypoint('Get Status Message NOT OK');
 
@@ -82,8 +68,8 @@ class SolrIngester extends GenericWorker
                     number_format((microtime(true) - $timeStart) * 1000, 0)
                 );
 
-                // Move the key to the reject queue.
-                $this->predis->rename($key, str_replace('solr-loader', 'solr-reject', $key));
+                // Put the product back in the queue.
+                $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolrFailed)->addItem($queuedProduct);
             }
         } catch (SolrException\HttpException $exception) {
             $this->waypoint('Solr HttpException');
@@ -95,6 +81,7 @@ class SolrIngester extends GenericWorker
                 number_format((microtime(true) - $timeStart) * 1000, 0),
                 $exception->getMessage()
             );
+            $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolr)->addItem($queuedProduct);
         } catch (SolrException\ExceptionInterface $exception) {
             $this->waypoint('Solr General Exception');
 
@@ -107,11 +94,12 @@ class SolrIngester extends GenericWorker
             );
 
             // Move the key to the reject queue.
-            $this->predis->rename($key, str_replace('solr-loader', 'solr-reject', $key));
+            $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolrFailed)->addItem($queuedProduct);
         } finally {
             $this->waypoint('Unset Solr');
 
             unset($solr);
         }
+        $this->updateMemoryUsage();
     }
 }

@@ -48,8 +48,7 @@ up:
 			traefik \
 			worker-feed \
 			worker-images \
-			worker-solr \
-			worker-stats
+			worker-solr
 
 run:
 	$(COMPOSE_STATEMENT) \

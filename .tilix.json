@@ -18,7 +18,7 @@
                     "badge": "BaaZ Stack Watch",
                     "directory": "\/home\/geusebio\/Baaz",
                     "height": 334,
-                    "overrideCommand": "bash -c \"while true; do docker stats -a --no-stream > \/tmp\/docker-stats; (clear; lolcat \/tmp\/docker-stats); done\"",
+                    "overrideCommand": "bash -c \"while true; do docker stats -a --no-stream | grep baaz > \/tmp\/docker-stats; (clear; lolcat \/tmp\/docker-stats); done\"",
                     "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                     "readOnly": true,
                     "synchronizedInput": true,

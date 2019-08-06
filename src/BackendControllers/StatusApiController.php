@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use Baaz\QueuesAndLists;
 use Predis\Client as Predis;
 use Predis\Collection\Iterator\Keyspace;
 use Psr\Http\Message\RequestInterface;
@@ -12,6 +13,7 @@ use Solarium\Client as SolrClient;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\Controller;
 use ⌬\Log\Logger;
+use ⌬\Redis\Queue\ItemListManager;
 
 class StatusApiController extends Controller
 {
@@ -24,18 +26,22 @@ class StatusApiController extends Controller
     private $logger;
     /** @var SolrClient */
     private $solr;
+    /** @var ItemListManager */
+    private $itemListManager;
 
     public function __construct(
         Configuration $configuration,
         Predis $redis,
         Logger $logger,
-        SolrClient $solr
+        SolrClient $solr,
+        ItemListManager $itemListManager
     ) {
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
         $this->solr = $solr;
         $this->redis->client('SETNAME', get_called_class());
+        $this->itemListManager = $itemListManager;
     }
 
     /**
@@ -72,15 +78,22 @@ class StatusApiController extends Controller
             );
         }
 
+        $listsAndQueues = [
+            QueuesAndLists::ListProducts,
+            QueuesAndLists::QueueWorkerPushSolr,
+            QueuesAndLists::QueueWorkerPushSolrFailed,
+            QueuesAndLists::QueueWorkerDownloadImages,
+            QueuesAndLists::QueueWorkerDownloadImagesFailed,
+        ];
+
+        $queueLengths = [];
+        foreach ($listsAndQueues as $list) {
+            $queueLengths[$list] = $this->itemListManager->getList($list)->getLength();
+        }
+
         return $response->withJson([
             'Status' => 'Okay',
-            'Products' => $this->redis->get('count:products'),
-            'Queues' => [
-                'Solr' => $this->redis->get('count:worker-queue-solr'),
-                'SolrReject' => $this->redis->get('count:worker-queue-solr-reject'),
-                'Image' => $this->redis->get('count:worker-queue-image'),
-                'ImageFail' => $this->redis->get('count:worker-queue-image-failed'),
-            ],
+            'Lists' => $queueLengths,
             'SlowLog' => $slowLog,
             'Memory' => $memoryUsage,
         ]);

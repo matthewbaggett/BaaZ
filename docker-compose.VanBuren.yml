@@ -20,8 +20,8 @@ services:
       - cache:/app/cache
       - persist:/app/persist
     environment:
-      THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 1000
+      THREAD_MULTIPLE: 0.50
+      DELAY_PER_ITEM_MS: 100
     cpus: 0.20
 
   worker-images:
@@ -29,9 +29,6 @@ services:
 
   worker-solr:
     cpus: 0.40
-
-  worker-stats:
-    cpus: 0.20
 
   redis-backend:
     volumes:

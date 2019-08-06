@@ -3,6 +3,7 @@
 namespace Baaz\Models;
 
 use Solarium\Core\Query\DocumentInterface;
+use ⌬\UUID\UUID;
 
 class Product extends MultiMediaModel
 {
@@ -24,6 +25,7 @@ class Product extends MultiMediaModel
     protected $familyCode;
     protected $feedID;
     protected $gender;
+    protected $id;
     protected $imageURL;
     protected $material;
     protected $name;
@@ -115,6 +117,7 @@ class Product extends MultiMediaModel
         $this->timeImported = date('Y-m-d H:i:s');
         $this->category = explode('>', $this->categoryPath);
         $this->categoryPath = explode('>', $this->channelCategoryPath);
+        $this->uuid = UUID::v4();
 
         return $this;
     }
@@ -153,7 +156,7 @@ class Product extends MultiMediaModel
         }
 
         // Squash Nonsense giant arrays of pictures
-        if(is_array($this->pictures) && count($this->pictures) > 50){
+        if (is_array($this->pictures) && count($this->pictures) > 50) {
             $this->pictures = [];
         }
 

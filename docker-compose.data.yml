@@ -1,6 +1,8 @@
 version: '2.4'
 
 networks:
+  public:
+    name: baaz_public
   private:
 
 services:
@@ -31,3 +33,9 @@ services:
       - docker-entrypoint.sh
       - solr-precreate
       - mycore
+    labels:
+      - "traefik.docker.backend=solr"
+      - "traefik.port=8983"
+      - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.frontend.rule=Host:solr.baaz.local"
+      - "traefik.docker.network=baaz_public"
