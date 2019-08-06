@@ -3,6 +3,7 @@
 namespace Baaz\Controllers;
 
 use Predis\Client as Predis;
+use Predis\Collection\Iterator\Keyspace;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -47,14 +48,28 @@ class StatusApiController extends Controller
      */
     public function status(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $memoryKeys = $this->redis->keys('memory:*');
         $memoryUsage = [];
-        foreach ($memoryKeys as $memoryKey) {
+        foreach (new Keyspace($this->redis, 'memory:*') as $memoryKey) {
             list($memory, $set, $task, $node) = explode(':', $memoryKey);
             $bytes = $this->redis->lrange($memoryKey, 0, 99);
             $bytes = ceil(array_sum($bytes) / count($bytes));
             $megabytes = $bytes / 1024 / 1024;
             $memoryUsage[ucfirst($set)][ucfirst($task)][strtoupper($node)] = number_format($megabytes, 2).'MB';
+        }
+
+        $slowLog = [];
+        list($serverTime, $microsecondsPast) = $this->redis->time();
+        $slowQueries = $this->redis->slowlog('GET', 100);
+        usort($slowQueries, function ($a, $b) { return $a['duration'] <= $b['duration']; });
+        foreach ($slowQueries as $slowQuery) {
+            $slowLog[] = sprintf(
+                '(%s => %s) %s in %sms (%s sec ago)',
+                $slowQuery['clientIp'] ?? 'Unknown Client Connections',
+                $slowQuery['clientName'] ?? 'Unknown Client Name',
+                implode(' ', $slowQuery['command']),
+                number_format($slowQuery['duration'] / 1000, 0),
+                $serverTime - $slowQuery['timestamp'],
+            );
         }
 
         return $response->withJson([
@@ -64,7 +79,9 @@ class StatusApiController extends Controller
                 'Solr' => $this->redis->get('count:worker-queue-solr'),
                 'SolrReject' => $this->redis->get('count:worker-queue-solr-reject'),
                 'Image' => $this->redis->get('count:worker-queue-image'),
+                'ImageFail' => $this->redis->get('count:worker-queue-image-failed'),
             ],
+            'SlowLog' => $slowLog,
             'Memory' => $memoryUsage,
         ]);
     }
