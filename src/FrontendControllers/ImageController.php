@@ -18,6 +18,7 @@ use ⌬\Redis\Redis;
 class ImageController extends HtmlController
 {
     use Traits\ApiTrait;
+    use Traits\RedisClientTrait;
 
     /** @var Configuration */
     private $configuration;
@@ -42,11 +43,11 @@ class ImageController extends HtmlController
         $this->logger = $logger;
         $this->imageFilesystem = $imageFilesystem;
 
-        $this->redis->client('SETNAME', get_called_class());
+        #$this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**
-     * @route GET i/{imageUUID}/{dimensions}.jpg
+     * @route GET i/{productUUID}/{imageUUID}/{dimensions}.jpg
      * @route GET image/{imageUUID}/{dimensions}.jpg
      *
      * @param Request  $request
@@ -54,17 +55,21 @@ class ImageController extends HtmlController
      *
      * @return ResponseInterface
      */
-    public function product(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function image(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $imageUUID = $request->getAttribute('imageUUID');
+        $productUUID = $request->getAttribute('productUUID');
 
-        $imageResponse = $this->apiRequest('GET', "v1/image/{$imageUUID}.json");
+        $productResponse = $this->apiRequest('GET', "v1/api/product/{$productUUID}.json");
 
-        $file = $this->imageFilesystem->get($imageResponse['Image']['StoragePath']);
+        foreach($productResponse['Product']['Images'] as $image){
+            $file = $this->imageFilesystem->get($image['StoragePath']);
 
-        $response = $response->withBody(new Body(fopen('php://temp', 'r+')));
-        $response->getBody()->write($file->read());
+            $response = $response->withBody(new Body(fopen('php://temp', 'r+')));
+            $response->getBody()->write($file->read());
 
-        return $response->withHeader('Content-Type', 'image/jpeg');
+            return $response->withHeader('Content-Type', 'image/jpeg');
+        }
+
+        return $response->withStatus(404,"Not found");
     }
 }

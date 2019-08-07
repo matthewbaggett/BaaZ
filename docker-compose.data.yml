@@ -7,7 +7,7 @@ networks:
 
 services:
 
-  redis-backend:
+  redis:
     image: redis:5
     restart: always
     ports:
@@ -27,12 +27,14 @@ services:
     restart: always
     ports:
       - "127.0.0.20:8983:8983"
+    volumes:
+      - ./solr:/baaz
     networks:
       - private
     entrypoint:
       - docker-entrypoint.sh
       - solr-precreate
-      - mycore
+      - baaz
     labels:
       - "traefik.docker.backend=solr"
       - "traefik.port=8983"

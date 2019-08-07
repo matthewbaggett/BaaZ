@@ -14,9 +14,12 @@ use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\Controller;
 use ⌬\Log\Logger;
 use ⌬\Redis\Queue\ItemListManager;
+use ⌬\Redis\Queue\ItemQueueManager;
 
 class StatusApiController extends Controller
 {
+    use Traits\RedisClientTrait;
+
     protected const FIELDS_WE_CARE_ABOUT = ['Brand', 'Name', 'Description'];
     /** @var Configuration */
     private $configuration;
@@ -28,20 +31,24 @@ class StatusApiController extends Controller
     private $solr;
     /** @var ItemListManager */
     private $itemListManager;
+    /** @var ItemQueueManager */
+    private $itemQueueManager;
 
     public function __construct(
         Configuration $configuration,
         Predis $redis,
         Logger $logger,
         SolrClient $solr,
-        ItemListManager $itemListManager
+        ItemListManager $itemListManager,
+        ItemQueueManager $itemQueueManager
     ) {
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
         $this->solr = $solr;
-        $this->redis->client('SETNAME', get_called_class());
+        $this->redis->client('SETNAME', $this->getCalledClassStub());
         $this->itemListManager = $itemListManager;
+        $this->itemQueueManager = $itemQueueManager;
     }
 
     /**
@@ -78,8 +85,10 @@ class StatusApiController extends Controller
             );
         }
 
-        $listsAndQueues = [
+        $lists = [
             QueuesAndLists::ListProducts,
+        ];
+        $queues = [
             QueuesAndLists::QueueWorkerPushSolr,
             QueuesAndLists::QueueWorkerPushSolrFailed,
             QueuesAndLists::QueueWorkerDownloadImages,
@@ -87,8 +96,11 @@ class StatusApiController extends Controller
         ];
 
         $queueLengths = [];
-        foreach ($listsAndQueues as $list) {
+        foreach ($lists as $list) {
             $queueLengths[$list] = $this->itemListManager->getList($list)->getLength();
+        }
+        foreach ($queues as $queue) {
+            $queueLengths[$queue] = $this->itemQueueManager->getQueue($queue)->getLength();
         }
 
         return $response->withJson([

@@ -15,12 +15,10 @@ services:
     networks:
       - private
     depends_on:
-      redis-backend:
+      redis:
         condition: service_healthy
     environment:
-      REDIS_HOST: tcp://redis-backend:6379
-      THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 0
+      REDIS_HOST: tcp://redis:6379
 
   worker-images:
     build:
@@ -33,10 +31,10 @@ services:
     networks:
       - private
     depends_on:
-      redis-backend:
+      redis:
         condition: service_healthy
     environment:
-      REDIS_HOST: tcp://redis-backend:6379
+      REDIS_HOST: tcp://redis:6379
 
   worker-solr:
     build:
@@ -49,10 +47,10 @@ services:
     networks:
       - private
     depends_on:
-      redis-backend:
+      redis:
         condition: service_healthy
       solr:
         condition: service_started
     environment:
-      REDIS_HOST: tcp://redis-backend:6379
+      REDIS_HOST: tcp://redis:6379
       SOLR_HOST: tcp://solr:8983

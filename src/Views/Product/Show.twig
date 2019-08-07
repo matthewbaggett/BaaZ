@@ -91,10 +91,13 @@
                 {{ Product.Description | nl2br }}
             </div>
             <div class="col-lg-5 col-md-5 col-sm-6">
-                <img
-                        style="width: 100%; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;"
-                        src="/{{ Product.Images[0].Slug }}"
-                />
+                {% for Image in Product.Images %}
+                    <img
+                            style="width: 100%; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;"
+                            src="/i/{{ Image.ProductUUID }}/{{ Image.Uuid }}/300x300.jpg"
+                    />
+                {% endfor %}
+
                 <a href="{{ Product.Deeplink }}" class="btn btn-success">Go get it from {{ Product.ReferringDomain }}!</a>
             </div>
             {{ dump(Product) }}

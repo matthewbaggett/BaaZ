@@ -22,8 +22,10 @@ services:
     networks:
       - public
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
 
   frontend:
     build:
@@ -33,15 +35,13 @@ services:
     restart: always
     volumes:
       - ./:/app
-      - cache:/app/cache
-      - persist:/app/persist
       - ./src/FrontendControllers:/app/src/Controllers:ro
     environment:
       SERVICE_NAME: frontend
-      REDIS_HOST: tcp://redis-backend:6379
+      REDIS_HOST: tcp://redis:6379
       BAAZ_BACKEND: http://backend/
     depends_on:
-      redis-backend:
+      redis:
         condition: service_healthy
       backend:
         condition: service_healthy
@@ -64,15 +64,13 @@ services:
     restart: always
     volumes:
       - ./:/app
-      - cache:/app/cache
-      - persist:/app/persist
       - ./src/BackendControllers:/app/src/Controllers:ro
     environment:
       SERVICE_NAME: backend
-      REDIS_HOST: tcp://redis-backend:6379
+      REDIS_HOST: tcp://redis:6379
       SOLR_HOST: tcp://solr:8983
     depends_on:
-      redis-backend:
+      redis:
         condition: service_healthy
       solr:
         condition: service_started

@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use Baaz\Lists\ImageList;
 use Baaz\Models\Image;
 use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
@@ -16,6 +17,8 @@ use ⌬\Redis\Redis;
 
 class ImageController extends HtmlController
 {
+    use Traits\RedisClientTrait;
+
     /** @var Configuration */
     private $configuration;
     /** @var Redis */
@@ -36,7 +39,7 @@ class ImageController extends HtmlController
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
-        $this->redis->client('SETNAME', get_called_class());
+        #$this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**
@@ -49,13 +52,14 @@ class ImageController extends HtmlController
      */
     public function image(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $imageList = ImageList::Factory();
         $imageUUID = $request->getAttribute('imageUUID');
 
-        $image = Image::Factory()->load($imageUUID);
+        $image = $imageList->find($imageUUID);
 
         return $response->withJson([
             'Status' => 'Okay',
-            'Image' => $image->__toArray(),
+            'Image' => $image,
         ]);
     }
 }

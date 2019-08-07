@@ -34,11 +34,10 @@ class SolrIngester extends GenericWorker
         $timeStart = microtime(true);
 
         /** @var Product $product */
-        $product = new Product(
-            $this->listManager
-                ->getList(QueuesAndLists::ListProducts)
-                ->find($queuedProduct['product'])
-        );
+        $listItem = $this->listManager
+            ->getList(QueuesAndLists::ListProducts)
+            ->find($queuedProduct['product']);
+        $product = new Product($listItem);
 
         $this->waypoint('Load Product');
         $update = $solr->createUpdate();
@@ -82,6 +81,9 @@ class SolrIngester extends GenericWorker
                 $exception->getMessage()
             );
             $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolr)->addItem($queuedProduct);
+
+            // Sleep so we don't hammer solr.
+            sleep(5);
         } catch (SolrException\ExceptionInterface $exception) {
             $this->waypoint('Solr General Exception');
 
@@ -95,6 +97,9 @@ class SolrIngester extends GenericWorker
 
             // Move the key to the reject queue.
             $this->queueManager->getQueue(QueuesAndLists::QueueWorkerPushSolrFailed)->addItem($queuedProduct);
+
+            // Sleep so we don't hammer solr.
+            sleep(5);
         } finally {
             $this->waypoint('Unset Solr');
 

@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use Baaz\Controllers\Traits;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;
@@ -15,6 +16,7 @@ use ⌬\Redis\Redis;
 class ProductController extends HtmlController
 {
     use Traits\ApiTrait;
+    use Traits\RedisClientTrait;
 
     /** @var Configuration */
     private $configuration;
@@ -34,8 +36,6 @@ class ProductController extends HtmlController
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
-
-        $this->redis->client('SETNAME', get_called_class());
     }
 
     /**

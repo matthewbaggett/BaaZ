@@ -2,6 +2,7 @@
 
 namespace Baaz\Controllers;
 
+use Baaz\Controllers\Traits;
 use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -15,6 +16,8 @@ use ⌬\Redis\Redis;
 
 class DemoController extends HtmlController
 {
+    use Traits\RedisClientTrait;
+
     /** @var Configuration */
     private $configuration;
     /** @var Redis */
@@ -41,7 +44,7 @@ class DemoController extends HtmlController
             'timeout' => 2.0,
         ]);
 
-        $this->redis->client('SETNAME', get_called_class());
+        $this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**

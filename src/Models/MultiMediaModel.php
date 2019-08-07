@@ -18,6 +18,8 @@ class MultiMediaModel implements DocumentInterface
     /** @var Predis */
     private $__predis;
 
+    protected $__fieldsThatCanBeArrays = [];
+
     /** @var TimeAgo */
     private $__timeAgo;
 
@@ -28,13 +30,19 @@ class MultiMediaModel implements DocumentInterface
         $this->__timeAgo = new TimeAgo();
         foreach ($query as $field => $value) {
             $field = lcfirst($field);
-            if (is_array($value)) {
+            if (!in_array($field, $this->__fieldsThatCanBeArrays) && is_array($value)) {
                 $value = reset($value);
             }
+
+            if(($decoded = json_decode($value)) !== null){
+                $value = $decoded;
+            }
+
             if (property_exists($this, $field)) {
                 $this->{$field} = $value;
             }
         }
+
     }
 
     public function __call($name, $arguments)

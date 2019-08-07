@@ -26,10 +26,10 @@ class Product extends MultiMediaModel
     protected $feedID;
     protected $gender;
     protected $id;
+    protected $images;
     protected $imageURL;
     protected $material;
     protected $name;
-    protected $pictures;
     protected $price;
     protected $productURL;
     protected $productId;
@@ -47,15 +47,10 @@ class Product extends MultiMediaModel
 
     public function __construct($query = [], $response = null)
     {
+        #$this->__fieldsThatCanBeArrays[] = 'colours';
+        #$this->__fieldsThatCanBeArrays[] = 'images';
+
         parent::__construct($query, $response);
-        if (!empty($query) && isset($query['Images'])) {
-            foreach ($query['Images'] as $imageJson) {
-                $imageJson = json_decode($imageJson, true);
-                foreach ($imageJson as $image) {
-                    $this->__relatedImages[] = Image::Factory()->load($image['Uuid']);
-                }
-            }
-        }
     }
 
     protected function __map(array $inputData, array $mapping): self
@@ -70,19 +65,12 @@ class Product extends MultiMediaModel
 
     public function __toArray()
     {
-        $images = [];
-
-        foreach ($this->__relatedImages as $image) {
-            $images[] = $image->__toArray();
-        }
-
         return array_merge(
             parent::__toArray(),
             [
                 'TimeImportedAgo' => $this->timeImported ? $this->getTimeAgo()->inWordsFromStrings($this->timeImported) : null,
                 'ReferringDomain' => $this->getReferringDomain(),
                 'Slug' => $this->getSlug(),
-                'Images' => $images,
             ]
         );
     }
@@ -146,32 +134,10 @@ class Product extends MultiMediaModel
         );
     }
 
-    public function load($uuid): MultiMediaModel
-    {
-        $this->pictures = [];
-        $return = parent::load($uuid);
-
-        if (is_string($this->pictures)) {
-            $this->pictures = json_decode($this->pictures);
-        }
-
-        // Squash Nonsense giant arrays of pictures
-        if (is_array($this->pictures) && count($this->pictures) > 50) {
-            $this->pictures = [];
-        }
-
-        if (is_array($this->pictures) && count($this->pictures) > 0) {
-            foreach ($this->pictures as $picture) {
-                $this->__relatedImages[] = Image::Factory()->load($picture);
-            }
-        }
-
-        return $return;
-    }
-
     public function createSolrDocument(\Solarium\QueryType\Update\Query\Query $solrQuery): DocumentInterface
     {
         $solrDocument = $solrQuery->createDocument();
+
         foreach ($this->__toArray() as $k => $v) {
             if ($v) {
                 if (!(is_string($v) || is_numeric($v))) {

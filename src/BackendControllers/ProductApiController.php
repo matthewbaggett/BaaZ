@@ -2,6 +2,8 @@
 
 namespace Baaz\Controllers;
 
+use Baaz\Controllers\Traits;
+use Baaz\Lists\ProductList;
 use Baaz\Models\Product;
 use Predis\Client as Predis;
 use Psr\Http\Message\RequestInterface;
@@ -17,6 +19,8 @@ use ⌬\Log\Logger;
 
 class ProductApiController extends Controller
 {
+    use Traits\RedisClientTrait;
+
     protected const FIELDS_WE_CARE_ABOUT = ['Brand', 'Name', 'Description'];
     /** @var Configuration */
     private $configuration;
@@ -26,6 +30,8 @@ class ProductApiController extends Controller
     private $logger;
     /** @var SolrClient */
     private $solr;
+    /** @var ProductList */
+    private $productList;
 
     public function __construct(
         Configuration $configuration,
@@ -37,7 +43,28 @@ class ProductApiController extends Controller
         $this->redis = $redis;
         $this->logger = $logger;
         $this->solr = $solr;
-        $this->redis->client('SETNAME', get_called_class());
+        $this->redis->client('SETNAME', $this->getCalledClassStub());
+        $this->productList = ProductList::Factory();
+    }
+
+    /**
+     * @route GET v1/api/product/random.json
+     *
+     * @param Request  $request
+     * @param Response $response
+     *
+     * @return ResponseInterface
+     */
+    public function product_randomSingle(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $product = $this->productList->getNextItem();
+
+        //!\Kint::dump($product);exit;
+
+        return $response->withJson([
+            'Status' => 'Okay',
+            'Products' => $product,
+        ]);
     }
 
     /**
@@ -52,11 +79,13 @@ class ProductApiController extends Controller
     {
         $productUUID = $request->getAttribute('productUUID');
 
-        $product = (new Product())->load($productUUID);
+        $product = $this->productList->find($productUUID);
+
+        //!\Kint::dump($product);exit;
 
         return $response->withJson([
             'Status' => 'Okay',
-            'Product' => $product->__toArray(),
+            'Product' => $product,
         ]);
     }
 
@@ -161,41 +190,16 @@ class ProductApiController extends Controller
      */
     public function products(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        // @todo not sure how to implement random here yet.
+        // @todo not sure how to implement not-random here yet. Its always random.
         $random = null !== $request->getQueryParam('random');
         $count = (int) ($request->getQueryParam('count') ?? 5);
 
-        $productUUIDs = $this->scanUntilEnoughFound('product:*', $count);
-
-        $products = [];
-        foreach ($productUUIDs as $productUUID) {
-            $productUUID = str_replace('product:', '', $productUUID);
-            $product = (new Product())->load($productUUID);
-            $products[] = $product->__toArray();
-        }
-
-        //\Kint::dump($count, $productUUIDs, $products);exit;
+        $products = $this->productList->getNextItems($count);
 
         return $response->withJson([
             'Status' => 'Okay',
             'Products' => $products,
         ]);
-    }
-
-    private function scanUntilEnoughFound($match, $count)
-    {
-        $found = [];
-        $cursor = 0;
-        $loopedAround = false;
-        while (count($found) < $count && false == $loopedAround) {
-            list($cursor, $keys) = $this->redis->scan($cursor, ['match' => $match, 'count' => $count]);
-            $found = array_unique(array_merge($found, $keys));
-            if (0 == $cursor) {
-                $loopedAround = true;
-            }
-        }
-
-        return array_slice($found, 0, $count);
     }
 
     private function debugSolr(ResultInterface $resultset)
