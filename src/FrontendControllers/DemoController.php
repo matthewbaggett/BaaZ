@@ -11,7 +11,7 @@ use Slim\Views\Twig;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
-use ⌬\Redis\Redis;
+use Predis\Client as PredisClient;
 
 class DemoController extends HtmlController
 {
@@ -19,7 +19,7 @@ class DemoController extends HtmlController
 
     /** @var Configuration */
     private $configuration;
-    /** @var Redis */
+    /** @var PredisClient */
     private $redis;
     /** @var Logger */
     private $logger;
@@ -29,7 +29,7 @@ class DemoController extends HtmlController
     public function __construct(
         Twig $twig,
         Configuration $configuration,
-        Redis $redis,
+        PredisClient $redis,
         Logger $logger
     ) {
         parent::__construct($twig);
@@ -43,7 +43,7 @@ class DemoController extends HtmlController
             'timeout' => 2.0,
         ]);
 
-        $this->redis->client('SETNAME', $this->getCalledClassStub());
+        $this->redis->client('SETNAME',$this->getCalledClassStub());
     }
 
     /**

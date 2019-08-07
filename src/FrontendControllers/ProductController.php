@@ -10,8 +10,7 @@ use Slim\Views\Twig;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
-use ⌬\Redis\Redis;
-
+use Predis\Client as PredisClient;
 class ProductController extends HtmlController
 {
     use Traits\ApiTrait;
@@ -19,7 +18,7 @@ class ProductController extends HtmlController
 
     /** @var Configuration */
     private $configuration;
-    /** @var Redis */
+    /** @var PredisClient */
     private $redis;
     /** @var Logger */
     private $logger;
@@ -27,7 +26,7 @@ class ProductController extends HtmlController
     public function __construct(
         Twig $twig,
         Configuration $configuration,
-        Redis $redis,
+        PredisClient $redis,
         Logger $logger
     ) {
         parent::__construct($twig);
@@ -35,6 +34,7 @@ class ProductController extends HtmlController
         $this->configuration = $configuration;
         $this->redis = $redis;
         $this->logger = $logger;
+        $this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**

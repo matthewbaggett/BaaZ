@@ -3,7 +3,6 @@
 namespace Baaz\Controllers;
 
 use Baaz\Filesystem\ImageFilesystem;
-use Baaz\Models\Image;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;
@@ -13,8 +12,7 @@ use Slim\Views\Twig;
 use ⌬\Configuration\Configuration;
 use ⌬\Controllers\Abstracts\HtmlController;
 use ⌬\Log\Logger;
-use ⌬\Redis\Redis;
-
+use Predis\Client as PredisClient;
 class ImageController extends HtmlController
 {
     use Traits\ApiTrait;
@@ -22,7 +20,7 @@ class ImageController extends HtmlController
 
     /** @var Configuration */
     private $configuration;
-    /** @var Redis */
+    /** @var PredisClient */
     private $redis;
     /** @var Logger */
     private $logger;
@@ -32,7 +30,7 @@ class ImageController extends HtmlController
     public function __construct(
         Twig $twig,
         Configuration $configuration,
-        Redis $redis,
+        PredisClient $redis,
         Logger $logger,
         ImageFilesystem $imageFilesystem
     ) {
@@ -43,7 +41,7 @@ class ImageController extends HtmlController
         $this->logger = $logger;
         $this->imageFilesystem = $imageFilesystem;
 
-        //$this->redis->client('SETNAME', $this->getCalledClassStub());
+        $this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**
