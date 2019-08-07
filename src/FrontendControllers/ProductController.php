@@ -51,10 +51,12 @@ class ProductController extends HtmlController
         $productUUID = $request->getAttribute('productUUID');
 
         $productResponse = $this->apiRequest('GET', "v1/api/product/{$productUUID}.json");
+        $statsResponse = $this->apiRequest("GET", "v1/status.json");
+        $pageContent = array_merge((array) $statsResponse, (array) $productResponse);
 
         $this->setTitle($productResponse['Product']['Name']);
 
-        return $this->renderHtml($request, $response, 'Product/Show.twig', (array) $productResponse);
+        return $this->renderHtml($request, $response, 'Product/Show.twig', $pageContent);
     }
 
     /**
@@ -72,12 +74,14 @@ class ProductController extends HtmlController
         $searchTerms = $request->getAttribute('searchTerms');
 
         $productsResponse = $this->apiRequest('GET', "v1/api/search/{$searchTerms}.json?perPage={$numProducts}");
+        $statsResponse = $this->apiRequest("GET", "v1/status.json");
+        $pageContent = array_merge((array) $statsResponse, (array) $productsResponse);
 
         $this->setTitle($searchTerms);
 
         $this->addCss(__DIR__.'/../../assets/starbursts.css');
 
-        return $this->renderHtml($request, $response, 'Product/List.twig', (array) $productsResponse);
+        return $this->renderHtml($request, $response, 'Product/List.twig', $pageContent);
     }
 
     /**
@@ -109,11 +113,13 @@ class ProductController extends HtmlController
         $numProducts = 50;
 
         $productsResponse = $this->apiRequest('GET', "v1/api/random.json?perPage={$numProducts}");
+        $statsResponse = $this->apiRequest("GET", "v1/status.json");
+        $pageContent = array_merge((array) $statsResponse, (array) $productsResponse);
 
         $this->setTitle("{$numProducts} Random Products!");
 
         $this->addCss(__DIR__.'/../../assets/starbursts.css');
 
-        return $this->renderHtml($request, $response, 'Product/List.twig', (array) $productsResponse);
+        return $this->renderHtml($request, $response, 'Product/List.twig', $pageContent);
     }
 }
