@@ -11,8 +11,8 @@ services:
 
   worker-feed:
     environment:
-      THREAD_MULTIPLE: 0.25
-      DELAY_PER_ITEM_MS: 30000
+      THREAD_MULTIPLE: 0.50
+      DELAY_PER_ITEM_MS: 250
     cpus: 0.20
 
   worker-images:
