@@ -540,12 +540,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/benzine-framework/benzine-redis-queue.git",
-                "reference": "d48b2c379a7100c1d19997bffde9dca18918b94f"
+                "reference": "5334d9ff845df73e845286e347a8042072e2f241"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/benzine-framework/benzine-redis-queue/zipball/d48b2c379a7100c1d19997bffde9dca18918b94f",
-                "reference": "d48b2c379a7100c1d19997bffde9dca18918b94f",
+                "url": "https://api.github.com/repos/benzine-framework/benzine-redis-queue/zipball/5334d9ff845df73e845286e347a8042072e2f241",
+                "reference": "5334d9ff845df73e845286e347a8042072e2f241",
                 "shasum": ""
             },
             "require": {
@@ -578,7 +578,7 @@
                     "email": "matthew@baggett.me"
                 }
             ],
-            "time": "2019-08-06T19:22:50+00:00"
+            "time": "2019-08-07T20:45:34+00:00"
         },
         {
             "name": "benzine/benzine-router",
