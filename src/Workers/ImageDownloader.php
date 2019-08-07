@@ -39,12 +39,6 @@ class ImageDownloader extends GenericWorker
 
                 $this->predis->hset($productKey, 'Images', $encodedImages);
 
-                \Kint::dump(
-                    $this->predis->hgetall($productKey),
-                    $this->predis->hget($productKey, 'Images'),
-                    $encodedImages
-                );
-
                 $pipeline->flushPipeline();
 
                 // And add the product to a queue for the solr-loader
