@@ -30,6 +30,7 @@ services:
     volumes:
       - ./solr:/baaz
     networks:
+      - public
       - private
     entrypoint:
       - docker-entrypoint.sh
