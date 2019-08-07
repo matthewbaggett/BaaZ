@@ -34,7 +34,7 @@ class MultiMediaModel implements DocumentInterface
                 $value = reset($value);
             }
 
-            if (null !== ($decoded = json_decode($value))) {
+            if (is_string($value) && null !== ($decoded = json_decode($value))) {
                 $value = $decoded;
             }
 
