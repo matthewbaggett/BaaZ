@@ -91,14 +91,49 @@
                 {{ Product.Description | nl2br }}
             </div>
             <div class="col-lg-5 col-md-5 col-sm-6">
-                {% for Image in Product.Images %}
-                    <img
-                            style="width: 100%; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;"
-                            src="/i/{{ Image.ProductUUID }}/{{ Image.Uuid }}/300x300.jpg"
-                    />
-                {% endfor %}
+                <div class="bs-component">
+                    <div class="card mb-3">
+                        {% for Image in Product.Images %}
+                            <img style="height: 200px; width: 100%; display: block;"
+                                 src="/i/{{ Image.ProductUUID }}/{{ Image.Uuid }}/300x300.jpg"
+                                 alt="{{ Product.Name }}"
+                            />
+                        {% endfor %}
+                        <div class="card-body">
+                            <a href="{{ Product.Deeplink }}" class="btn btn-success">Go get it from {{ Product.ReferringDomain }}!</a>
+                        </div>
+                        <ul class="list-group list-group-flush">
 
-                <a href="{{ Product.Deeplink }}" class="btn btn-success">Go get it from {{ Product.ReferringDomain }}!</a>
+                            {% if Product.Brand %}<li class="list-group-item">Brand: {{ Product.Brand }}</li>{% endif %}
+                            {% if Product.ReferringDomain %}<li class="list-group-item">Sold By: <a href="{{ Product.Deeplink }}">{{ Product.ReferringDomain }}</a></li>{% endif %}
+                            {% if Product.DeliveryTime %}<li class="list-group-item">Delivered In: {{ Product.DeliveryTime }}</li>{% endif %}
+                            {% if Product.DeliveryCosts %}<li class="list-group-item">Delivery Costs: {% if Product.DeliveryCosts > 0 %}{{ Product.Currency }}{{ Product.DeliveryCosts }}{% else %}<em>Free!</em>{% endif %}</li>{% endif %}
+                            {% if Product.Material %}<li class="list-group-item">Material: {{ Product.Material }}</li>{% endif %}
+                            {% if Product.Sku %}<li class="list-group-item">SKU: {{ Product.Sku }}</li>{% endif %}
+                            {% if Product.Ean %}<li class="list-group-item">EAN: {{ Product.Ean }}</li>{% endif %}
+                            {% if Product.Material %}<li class="list-group-item">Material: {{ Product.Material }}</li>{% endif %}
+                            {% if Product.Price %}<li class="list-group-item">Price: {{ Product.Currency }}{{ Product.Price }}</li>{% endif %}
+
+                        </ul>
+                        <div class="card-body">
+                            <a href="{{ Product.Deeplink }}" class="card-link">{{ Product.ReferringDomain }}</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            Added {{ Product.TimeImported | time_diff }}
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">More from {{ Product.Brand }}</h4>
+                            <h6 class="card-subtitle mb-2 text-muted">I've not yet fleshed this out.</h6>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            <a href="#" class="card-link">Card link</a>
+                            <a href="#" class="card-link">Another link</a>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>
