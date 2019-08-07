@@ -37,11 +37,11 @@ class ImageDownloader extends GenericWorker
                 $productKey = "lists:data:products:{$work['product']}";
                 $encodedImages = json_encode($images);
 
-                $this->predis->hset($productKey, "Images", $encodedImages);
+                $this->predis->hset($productKey, 'Images', $encodedImages);
 
                 \Kint::dump(
                     $this->predis->hgetall($productKey),
-                    $this->predis->hget($productKey,'Images'),
+                    $this->predis->hget($productKey, 'Images'),
                     $encodedImages
                 );
 

@@ -15,10 +15,10 @@ class MultiMediaModel implements DocumentInterface
     protected $uuid;
     /** @var bool */
     protected $__isDirty = false;
-    /** @var Predis */
-    private $__predis;
 
     protected $__fieldsThatCanBeArrays = [];
+    /** @var Predis */
+    private $__predis;
 
     /** @var TimeAgo */
     private $__timeAgo;
@@ -30,11 +30,11 @@ class MultiMediaModel implements DocumentInterface
         $this->__timeAgo = new TimeAgo();
         foreach ($query as $field => $value) {
             $field = lcfirst($field);
-            if (!in_array($field, $this->__fieldsThatCanBeArrays) && is_array($value)) {
+            if (!in_array($field, $this->__fieldsThatCanBeArrays, true) && is_array($value)) {
                 $value = reset($value);
             }
 
-            if(($decoded = json_decode($value)) !== null){
+            if (null !== ($decoded = json_decode($value))) {
                 $value = $decoded;
             }
 
@@ -42,7 +42,6 @@ class MultiMediaModel implements DocumentInterface
                 $this->{$field} = $value;
             }
         }
-
     }
 
     public function __call($name, $arguments)

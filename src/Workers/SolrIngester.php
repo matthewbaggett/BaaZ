@@ -36,7 +36,8 @@ class SolrIngester extends GenericWorker
         /** @var Product $product */
         $listItem = $this->listManager
             ->getList(QueuesAndLists::ListProducts)
-            ->find($queuedProduct['product']);
+            ->find($queuedProduct['product'])
+        ;
         $product = new Product($listItem);
 
         $this->waypoint('Load Product');

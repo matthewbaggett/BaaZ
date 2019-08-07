@@ -2,7 +2,6 @@
 
 namespace Baaz\Controllers;
 
-use Baaz\Controllers\Traits;
 use Baaz\Lists\ProductList;
 use Baaz\Models\Product;
 use Predis\Client as Predis;

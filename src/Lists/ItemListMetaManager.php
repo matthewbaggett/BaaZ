@@ -3,16 +3,15 @@
 namespace Baaz\Lists;
 
 use Baaz\Baaz;
-use Baaz\QueuesAndLists;
 use Predis\Client as PredisClient;
 use ⌬\Redis\Queue\ItemList;
 use ⌬\Redis\Queue\ItemListManager;
 
 class ItemListMetaManager extends ItemList
 {
-    static protected $metaManager;
+    protected static $metaManager;
 
-    public static function Factory() : ItemList
+    public static function Factory(): ItemList
     {
         $class = get_called_class();
         $listName = $class::LIST_NAME;
@@ -27,10 +26,11 @@ class ItemListMetaManager extends ItemList
     {
         $iter = 0;
         $items = [];
-        while(count($items) < $count && $iter < ($count * 2) ){
-            $iter++;
+        while (count($items) < $count && $iter < ($count * 2)) {
+            ++$iter;
             $items[] = parent::getNextItem();
         }
+
         return $items;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Baaz\Controllers;
 
-use Baaz\Controllers\Traits;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Request;

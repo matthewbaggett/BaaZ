@@ -47,8 +47,8 @@ class Product extends MultiMediaModel
 
     public function __construct($query = [], $response = null)
     {
-        #$this->__fieldsThatCanBeArrays[] = 'colours';
-        #$this->__fieldsThatCanBeArrays[] = 'images';
+        //$this->__fieldsThatCanBeArrays[] = 'colours';
+        //$this->__fieldsThatCanBeArrays[] = 'images';
 
         parent::__construct($query, $response);
     }

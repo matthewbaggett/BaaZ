@@ -43,7 +43,7 @@ class ImageController extends HtmlController
         $this->logger = $logger;
         $this->imageFilesystem = $imageFilesystem;
 
-        #$this->redis->client('SETNAME', $this->getCalledClassStub());
+        //$this->redis->client('SETNAME', $this->getCalledClassStub());
     }
 
     /**
@@ -61,7 +61,7 @@ class ImageController extends HtmlController
 
         $productResponse = $this->apiRequest('GET', "v1/api/product/{$productUUID}.json");
 
-        foreach($productResponse['Product']['Images'] as $image){
+        foreach ($productResponse['Product']['Images'] as $image) {
             $file = $this->imageFilesystem->get($image['StoragePath']);
 
             $response = $response->withBody(new Body(fopen('php://temp', 'r+')));
@@ -70,6 +70,6 @@ class ImageController extends HtmlController
             return $response->withHeader('Content-Type', 'image/jpeg');
         }
 
-        return $response->withStatus(404,"Not found");
+        return $response->withStatus(404, 'Not found');
     }
 }
