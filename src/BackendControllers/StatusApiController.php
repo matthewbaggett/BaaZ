@@ -97,11 +97,17 @@ class StatusApiController extends Controller
 
         $queueLengths = [];
         foreach ($lists as $list) {
-            $queueLengths[$list] = $this->itemListManager->getList($list)->getLength();
+            $niceName = implode("", array_map(function($word){ return ucfirst($word); },explode("-", $list)));
+            $queueLengths[$niceName] = $this->itemListManager->getList($list)->getLength();
         }
         foreach ($queues as $queue) {
-            $queueLengths[$queue] = $this->itemQueueManager->getQueue($queue)->getLength();
+            $niceName = implode("", array_map(function($word){ return ucfirst($word); },explode("-", $queue)));
+            $queueLengths[$niceName] = $this->itemQueueManager->getQueue($queue)->getLength();
         }
+
+        $queueLengths["ProductsValid"] = $queueLengths['Products'] - $queueLengths['WorkerPushSolr'];
+
+        ksort($queueLengths);
 
         return $response->withJson([
             'Status' => 'Okay',
